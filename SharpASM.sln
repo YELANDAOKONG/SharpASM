@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpASM", "SharpASM\SharpASM.csproj", "{9C8EA17D-3E43-453C-A662-4DFE10848755}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpTests", "SharpTests\SharpTests.csproj", "{B5CF174E-6AC5-4C7C-A3AB-DC797A18A159}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9C8EA17D-3E43-453C-A662-4DFE10848755}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C8EA17D-3E43-453C-A662-4DFE10848755}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C8EA17D-3E43-453C-A662-4DFE10848755}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C8EA17D-3E43-453C-A662-4DFE10848755}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5CF174E-6AC5-4C7C-A3AB-DC797A18A159}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5CF174E-6AC5-4C7C-A3AB-DC797A18A159}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5CF174E-6AC5-4C7C-A3AB-DC797A18A159}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5CF174E-6AC5-4C7C-A3AB-DC797A18A159}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

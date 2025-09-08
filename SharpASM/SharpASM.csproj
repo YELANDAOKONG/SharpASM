@@ -12,4 +12,10 @@
       <PackageReference Include="System.Text.Json" Version="9.0.8" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Core\" />
+      <Folder Include="Models\Type\" />
+      <Folder Include="Utilities\" />
+    </ItemGroup>
+
 </Project>

@@ -10,9 +10,12 @@ public static class ConstantPoolParser
     public static List<object> ParseConstantPool(byte[] data, ref int offset, ushort constantPoolCount)
     {
         var constantPool = new List<object>();
-            
+        
         for (int i = 1; i < constantPoolCount; i++)
         {
+            if (offset >= data.Length)
+                throw new ArgumentOutOfRangeException(nameof(offset), "Offset exceeds data length");
+                
             byte tag = data[offset++];
                 
             object constantPoolItem;
@@ -41,11 +44,11 @@ public static class ConstantPoolParser
                     break;
                 case ConstantPoolTag.Long:
                     constantPoolItem = ConstantLongInfoStruct.FromBytes(data, ref offset);
-                    i++; // Long and Double take two slots
+                    i++; // Long takes two slots
                     break;
                 case ConstantPoolTag.Double:
                     constantPoolItem = ConstantDoubleInfoStruct.FromBytes(data, ref offset);
-                    i++; // Long and Double take two slots
+                    i++; // Double takes two slots
                     break;
                 case ConstantPoolTag.NameAndType:
                     constantPoolItem = ConstantNameAndTypeInfoStruct.FromBytes(data, ref offset);

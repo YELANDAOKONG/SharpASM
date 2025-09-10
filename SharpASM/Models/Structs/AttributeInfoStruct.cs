@@ -10,5 +10,7 @@ public class AttributeInfoStruct
        }
      */
     
-    // TODO...
+    public ushort AttributeNameIndex { get; set; }
+    public uint AttributeLength { get; set; }
+    public byte[] Info { get; set; } = [];
 }

@@ -4,6 +4,9 @@ namespace SharpASM.Models.Structs;
 
 public class ClassStruct
 {
+
+    public const uint ClassMagic = 0xCAFEBABE;
+    
     /*
      * ClassFile {
            u4             magic;
@@ -29,9 +32,17 @@ public class ClassStruct
     public ushort MinorVersion { get; set; } = 0;
     public ushort MajorVersion { get; set; } = (ushort)ClassFileVersion.V17;
     
-    public ushort ConstantPoolCount { get; set; } = 0;
-    
-    // TODO...
-    
-    
+    public ushort ConstantPoolCount { get; set; }
+    public ConstantPoolInfoStruct[] ConstantPool { get; set; } = [];
+    public ushort AccessFlags { get; set; } 
+    public ushort ThisClass { get; set; }
+    public ushort SuperClass { get; set; }
+    public ushort InterfacesCount { get; set; }
+    public ushort[] Interfaces { get; set; } = [];
+    public ushort FieldsCount { get; set; }
+    public FieldInfoStruct[] Fields { get; set; } = [];
+    public ushort MethodsCount { get; set; }
+    public MethodInfoStruct[] Methods { get; set; } = [];
+    public ushort AttributesCount { get; set; }
+    public AttributeInfoStruct[] Attributes { get; set; } = [];
 }

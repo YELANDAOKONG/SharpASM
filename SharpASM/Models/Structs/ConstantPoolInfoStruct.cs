@@ -9,5 +9,6 @@ public class ConstantPoolInfoStruct
        }
      */
     
-    // TODO...
+    public byte Tag { get; set; }
+    public byte[] Info { get; set; } = [];
 }

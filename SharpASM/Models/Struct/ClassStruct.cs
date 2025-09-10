@@ -63,7 +63,7 @@ public class ClassStruct
                 continue;
             }
             builder.Append($"        {{\n");
-            builder.Append($"            Tag: {poolInfoStruct.Tag},\n");
+            builder.Append($"            Tag: {poolInfoStruct.Tag} ({((ConstantPoolTag)poolInfoStruct.Tag).ToString()}),\n");
             builder.Append($"            Info: 0x{BitConverter.ToString(poolInfoStruct.Info).Replace("-", "")},\n");
             builder.Append($"        }},\n");
         }

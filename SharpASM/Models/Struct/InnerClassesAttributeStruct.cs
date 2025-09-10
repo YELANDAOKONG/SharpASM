@@ -15,8 +15,16 @@ public class InnerClassesAttributeStruct
        }
      */
     
+    public class ClassesStruct
+    {
+        public ushort InnerClassInfoIndex { get; set; }
+        public ushort OuterClassInfoIndex { get; set; }
+        public ushort InnerNameIndex { get; set; }
+        public ushort InnerClassAccessFlags { get; set; }
+    }
+    
     public ushort AttributeNameIndex { get; set; }
     public uint AttributeLength { get; set; }
     public ushort NumberOfClasses { get; set; }
-    public InnerClassesClassesAttributeStruct[] Classes { get; set; } = [];
+    public ClassesStruct[] Classes { get; set; } = [];
 }

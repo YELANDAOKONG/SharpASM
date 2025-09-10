@@ -1,25 +1,34 @@
+using SharpASM.Models.Type;
+
 namespace SharpASM.Models;
 
 public class Class
 {
-    /*
-     * ClassFile {
-           u4             magic;
-           u2             minor_version;
-           u2             major_version;
-           u2             constant_pool_count;
-           cp_info        constant_pool[constant_pool_count-1];
-           u2             access_flags;
-           u2             this_class;
-           u2             super_class;
-           u2             interfaces_count;
-           u2             interfaces[interfaces_count];
-           u2             fields_count;
-           field_info     fields[fields_count];
-           u2             methods_count;
-           method_info    methods[methods_count];
-           u2             attributes_count;
-           attribute_info attributes[attributes_count];
-       }
-     */
+    
+    public uint Magic { get; set; } = 0xCAFEBABE;
+    public ushort MinorVersion { get; set; } = 0;
+    public ClassFileVersion MajorVersion { get; set; } = ClassFileVersion.V17;
+    
+    public ushort ConstantPoolCount => (ushort)(ConstantPool.Count + 1);
+    public List<ConstantPoolInfo> ConstantPool { get; set; } = new();
+    public ClassAccessFlags AccessFlags { get; set; }
+    
+    public ushort ThisClass { get; set; }
+    public ushort SuperClass { get; set; }
+    
+    public ushort InterfacesCount => (ushort)Interfaces.Count;
+    public List<ushort> Interfaces { get; set; } = new();
+    
+    public ushort FieldsCount => (ushort)Fields.Count;
+    
+    public List<Field> Fields { get; set; } = new();
+    
+    public ushort MethodsCount => (ushort)Methods.Count;
+    
+    public List<Method> Methods { get; set; } = new();
+    
+    public ushort AttributesCount => (ushort)Attributes.Count;
+    
+    public List<Attribute> Attributes { get; set; } = new();
+    
 }

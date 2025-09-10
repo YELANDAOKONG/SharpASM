@@ -14,7 +14,6 @@
 
     <ItemGroup>
       <Folder Include="Core\" />
-      <Folder Include="Models\Type\" />
       <Folder Include="Utilities\" />
     </ItemGroup>
 

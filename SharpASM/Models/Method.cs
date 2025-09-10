@@ -5,7 +5,7 @@ namespace SharpASM.Models;
 public class Method
 {
     public MethodAccessFlags AccessFlags { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Descriptor { get; set; } = string.Empty;
+    public ushort NameIndex { get; set; }
+    public ushort DescriptorIndex { get; set; }
     public List<Attribute> Attributes { get; set; } = new();
 }

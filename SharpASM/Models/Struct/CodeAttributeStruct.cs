@@ -21,5 +21,15 @@ public class CodeAttributeStruct
        }
      */
     
-    // TODO...
+    public ushort AttributeNameIndex { get; set; }
+    public uint AttributeLength { get; set; }
+    public ushort MaxStack { get; set; }
+    public ushort MaxLocals { get; set; }
+    public uint CodeLength { get; set; }
+    public byte[] Code { get; set; } = [];
+    public ushort ExceptionTableLength { get; set; }
+    public CodeAttributeExceptionTableStruct[] ExceptionTable { get; set; } = [];
+    public ushort AttributesCount { get; set; }
+    public AttributeInfoStruct[] Attributes { get; set; } = [];
+    
 }

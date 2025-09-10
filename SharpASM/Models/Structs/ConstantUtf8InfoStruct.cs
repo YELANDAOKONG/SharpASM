@@ -14,4 +14,20 @@ public class ConstantUtf8InfoStruct
     public byte Tag { get; set; } = (byte)ConstantPoolTag.Utf8;
     public ushort Length { get; set; }
     public byte[] Bytes { get; set; } = Array.Empty<byte>();
+    
+    
+    public static ConstantUtf8InfoStruct FromString(string text)
+    {
+        byte[] utf8Bytes = System.Text.Encoding.UTF8.GetBytes(text);
+        return new ConstantUtf8InfoStruct
+        {
+            Length = (ushort)utf8Bytes.Length,
+            Bytes = utf8Bytes
+        };
+    }
+    
+    public override string ToString()
+    {
+        return System.Text.Encoding.UTF8.GetString(Bytes);
+    }
 }

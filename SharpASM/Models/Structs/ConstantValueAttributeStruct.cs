@@ -1,12 +1,12 @@
 namespace SharpASM.Models.Structs;
 
-public class AttributeInfoStruct
+public class ConstantValueAttributeStruct
 {
     /*
-     * attribute_info {
+     * ConstantValue_attribute {
            u2 attribute_name_index;
            u4 attribute_length;
-           u1 info[attribute_length];
+           u2 constantvalue_index;
        }
      */
     

@@ -1,6 +1,6 @@
 using SharpASM.Models.Struct.Union;
 
-namespace SharpASM.Models.Struct;
+namespace SharpASM.Models.Struct.Attribute;
 
 public class StackMapTableAttributeStruct
 {

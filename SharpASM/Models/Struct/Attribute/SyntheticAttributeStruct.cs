@@ -1,17 +1,14 @@
-namespace SharpASM.Models.Struct;
+namespace SharpASM.Models.Struct.Attribute;
 
-public class SourceFileAttributeStruct
+public class SyntheticAttributeStruct
 {
     /*
-     * SourceFile_attribute {
+     * Synthetic_attribute {
            u2 attribute_name_index;
            u4 attribute_length;
-           u2 sourcefile_index;
        }
      */
     
     public ushort AttributeNameIndex { get; set; }
     public uint AttributeLength { get; set; }
-    public ushort SourceFileIndex { get; set; }
-    
 }

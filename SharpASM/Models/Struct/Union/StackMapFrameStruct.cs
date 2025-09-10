@@ -13,4 +13,12 @@ public class StackMapFrameStruct
            full_frame;
        }
      */
+
+    public SameFrameStruct SameFrame { get; set; } = new();
+    public SameLocals1StackItemFrameStruct SameLocals1StackItemFrame { get; set; } = new();
+    public SameLocals1StackItemFrameExtendedStruct SameLocals1StackItemFrameExtended { get; set; } = new();
+    public ChopFrameStruct ChopFrame { get; set; } = new();
+    public SameFrameExtendedStruct SameFrameExtended { get; set; } = new();
+    public AppendFrameStruct AppendFrame { get; set; } = new();
+    public FullFrameStruct FullFrame { get; set; } = new();
 }

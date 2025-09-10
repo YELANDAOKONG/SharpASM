@@ -1,4 +1,4 @@
-namespace SharpASM.Models.Struct;
+namespace SharpASM.Models.Struct.Attribute;
 
 public class ExceptionsAttributeStruct
 {

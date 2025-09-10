@@ -1,6 +1,6 @@
 using SharpASM.Utilities;
 
-namespace SharpASM.Models.Struct;
+namespace SharpASM.Models.Struct.Attribute;
 
 public class ConstantValueAttributeStruct : AttributeInfoStruct
 {

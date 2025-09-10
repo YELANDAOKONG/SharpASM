@@ -1,6 +1,6 @@
 namespace SharpASM.Models.Type;
 
-public enum ConstantPoolTag : ushort
+public enum ConstantPoolTag : byte
 {
     Utf8 = 1,
     Integer = 3,

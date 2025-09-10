@@ -31,4 +31,6 @@ public class Class
     
     public List<Attribute> Attributes { get; set; } = new();
     
+    // TODO...
+    
 }

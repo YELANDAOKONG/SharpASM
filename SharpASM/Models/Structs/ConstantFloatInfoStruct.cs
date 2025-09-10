@@ -34,13 +34,29 @@ public class ConstantFloatInfoStruct
         
     public float GetValue()
     {
-        byte[] byteArray = BitConverter.GetBytes(Bytes);
+        // Extract the big-endian bytes from the stored integer value
+        byte[] byteArray = new byte[4];
+        byteArray[0] = (byte)(Bytes >> 24);
+        byteArray[1] = (byte)(Bytes >> 16);
+        byteArray[2] = (byte)(Bytes >> 8);
+        byteArray[3] = (byte)Bytes;
+        // If the system is little-endian, reverse the bytes to get little-endian order for BitConverter
+        if (BitConverter.IsLittleEndian)
+        {
+            Array.Reverse(byteArray);
+        }
         return BitConverter.ToSingle(byteArray, 0);
     }
         
     public void SetValue(float value)
     {
         byte[] byteArray = BitConverter.GetBytes(value);
-        Bytes = BitConverter.ToUInt32(byteArray, 0);
+        // If the system is little-endian, reverse the bytes to get big-endian order
+        if (BitConverter.IsLittleEndian)
+        {
+            Array.Reverse(byteArray);
+        }
+        // Convert the big-endian bytes to an integer
+        Bytes = (uint)((byteArray[0] << 24) | (byteArray[1] << 16) | (byteArray[2] << 8) | byteArray[3]);
     }
 }

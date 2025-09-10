@@ -21,6 +21,14 @@ public class CodeAttributeStruct
        }
      */
     
+    public class ExceptionTableStruct
+    {
+        public ushort StartPc { get; set; }
+        public ushort EndPc { get; set; }
+        public ushort HandlerPc { get; set; }
+        public ushort CatchType { get; set; }
+    }
+    
     public ushort AttributeNameIndex { get; set; }
     public uint AttributeLength { get; set; }
     public ushort MaxStack { get; set; }
@@ -28,7 +36,7 @@ public class CodeAttributeStruct
     public uint CodeLength { get; set; }
     public byte[] Code { get; set; } = [];
     public ushort ExceptionTableLength { get; set; }
-    public CodeAttributeExceptionTableStruct[] ExceptionTable { get; set; } = [];
+    public ExceptionTableStruct[] ExceptionTable { get; set; } = [];
     public ushort AttributesCount { get; set; }
     public AttributeInfoStruct[] Attributes { get; set; } = [];
     

@@ -88,7 +88,7 @@ public class ClassStruct
                 continue;
             }
             builder.Append($"        {{\n");
-            builder.Append($"            AccessFlags: {field.AccessFlags} ( {FieldAccessFlagsHelper.GetFlagsString(AccessFlags)} ),\n");
+            builder.Append($"            AccessFlags: {field.AccessFlags} ( {FieldAccessFlagsHelper.GetFlagsString(field.AccessFlags)} ),\n");
             builder.Append($"            NameIndex: {field.NameIndex},\n");
             builder.Append($"            DescriptorIndex: {field.DescriptorIndex},\n");
             builder.Append($"            AttributesCount: {field.AttributesCount},\n");
@@ -118,7 +118,7 @@ public class ClassStruct
                 continue;
             }
             builder.Append($"        {{\n");
-            builder.Append($"            AccessFlags: {method.AccessFlags} ( {MethodAccessFlagsHelper.GetFlagsString(AccessFlags)} ),\n");
+            builder.Append($"            AccessFlags: {method.AccessFlags} ( {MethodAccessFlagsHelper.GetFlagsString(method.AccessFlags)} ),\n");
             builder.Append($"            NameIndex: {method.NameIndex},\n");
             builder.Append($"            DescriptorIndex: {method.DescriptorIndex},\n");
             builder.Append($"            AttributesCount: {method.AttributesCount},\n");

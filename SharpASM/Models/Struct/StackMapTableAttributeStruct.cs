@@ -1,3 +1,5 @@
+using SharpASM.Models.Struct.Union;
+
 namespace SharpASM.Models.Struct;
 
 public class StackMapTableAttributeStruct
@@ -11,5 +13,7 @@ public class StackMapTableAttributeStruct
        }
      */
     
-    // TODO...
+    public ushort AttributeNameIndex { get; set; }
+    public uint AttributeLength { get; set; }
+    public StackMapFrameStruct[] Entries { get; set; } = [];
 }

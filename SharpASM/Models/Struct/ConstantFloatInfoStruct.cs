@@ -14,6 +14,14 @@ public class ConstantFloatInfoStruct
     public byte Tag { get; set; } = (byte)ConstantPoolTag.Float;
     public uint Bytes { get; set; } 
     
+    public static ConstantFloatInfoStruct FromBytesWithTag(byte tag, byte[] data, ref int offset)
+    {
+        var info = new ConstantFloatInfoStruct();
+        info.Tag = tag;
+        info.Bytes = ByteUtils.ReadUInt32(data, ref offset);
+        return info;
+    }
+
     public static ConstantFloatInfoStruct FromBytes(byte[] data, ref int offset)
     {
         var info = new ConstantFloatInfoStruct();

@@ -16,66 +16,69 @@ public static class ConstantPoolParser
             if (offset >= data.Length)
                 throw new ArgumentOutOfRangeException(nameof(offset), "Offset exceeds data length");
                 
-            byte tag = data[offset++];
+            byte tag = data[offset++]; // Read tag once
                 
             object constantPoolItem;
             switch ((ConstantPoolTag)tag)
             {
                 case ConstantPoolTag.Class:
-                    constantPoolItem = ConstantClassInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantClassInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.Fieldref:
-                    constantPoolItem = ConstantFieldrefInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantFieldrefInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.Methodref:
-                    constantPoolItem = ConstantMethodrefInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantMethodrefInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.InterfaceMethodref:
-                    constantPoolItem = ConstantInterfaceMethodrefInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantInterfaceMethodrefInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.String:
-                    constantPoolItem = ConstantStringInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantStringInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.Integer:
-                    constantPoolItem = ConstantIntegerInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantIntegerInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.Float:
-                    constantPoolItem = ConstantFloatInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantFloatInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.Long:
-                    constantPoolItem = ConstantLongInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantLongInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     i++; // Long takes two slots
                     break;
                 case ConstantPoolTag.Double:
-                    constantPoolItem = ConstantDoubleInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantDoubleInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     i++; // Double takes two slots
                     break;
                 case ConstantPoolTag.NameAndType:
-                    constantPoolItem = ConstantNameAndTypeInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantNameAndTypeInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.Utf8:
-                    constantPoolItem = ConstantUtf8InfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantUtf8InfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.MethodHandle:
-                    constantPoolItem = ConstantMethodHandleInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantMethodHandleInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.MethodType:
-                    constantPoolItem = ConstantMethodTypeInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantMethodTypeInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.Dynamic:
-                    constantPoolItem = ConstantDynamicInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantDynamicInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.InvokeDynamic:
-                    constantPoolItem = ConstantInvokeDynamicInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantInvokeDynamicInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.Module:
-                    constantPoolItem = ConstantModuleInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantModuleInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 case ConstantPoolTag.Package:
-                    constantPoolItem = ConstantPackageInfoStruct.FromBytes(data, ref offset);
+                    constantPoolItem = ConstantPackageInfoStruct.FromBytesWithTag(tag, data, ref offset);
                     break;
                 default:
-                    throw new NotSupportedException($"Unknown constant pool tag: {tag}");
+                    int start = Math.Max(0, offset - 10);
+                    int end = Math.Min(data.Length, offset + 10);
+                    string context = BitConverter.ToString(data, start, end - start);
+                    throw new NotSupportedException($"Unknown constant pool tag: {tag} at offset {offset-1}. Context: {context}");
             }
                 
             constantPool.Add(constantPoolItem);

@@ -14,6 +14,14 @@ public class ConstantStringInfoStruct
     public byte Tag { get; set; } = (byte)ConstantPoolTag.String;
     public ushort NameIndex { get; set; }
     
+    public static ConstantStringInfoStruct FromBytesWithTag(byte tag, byte[] data, ref int offset)
+    {
+        var info = new ConstantStringInfoStruct();
+        info.Tag = tag;
+        info.NameIndex = ByteUtils.ReadUInt16(data, ref offset);
+        return info;
+    }
+
     public static ConstantStringInfoStruct FromBytes(byte[] data, ref int offset)
     {
         var info = new ConstantStringInfoStruct();

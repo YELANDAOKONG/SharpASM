@@ -16,6 +16,15 @@ public class ConstantDynamicInfoStruct
     public ushort BootstrapMethodAttrIndex { get; set; } 
     public ushort NameAndTypeIndex { get; set; } 
     
+    public static ConstantDynamicInfoStruct FromBytesWithTag(byte tag, byte[] data, ref int offset)
+    {
+        var info = new ConstantDynamicInfoStruct();
+        info.Tag = tag;
+        info.BootstrapMethodAttrIndex = ByteUtils.ReadUInt16(data, ref offset);
+        info.NameAndTypeIndex = ByteUtils.ReadUInt16(data, ref offset);
+        return info;
+    }
+
     public static ConstantDynamicInfoStruct FromBytes(byte[] data, ref int offset)
     {
         var info = new ConstantDynamicInfoStruct();

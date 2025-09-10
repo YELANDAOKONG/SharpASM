@@ -14,6 +14,14 @@ public class ConstantIntegerInfoStruct
     public byte Tag { get; set; } = (byte)ConstantPoolTag.Integer;
     public uint Bytes { get; set; } 
     
+    public static ConstantIntegerInfoStruct FromBytesWithTag(byte tag, byte[] data, ref int offset)
+    {
+        var info = new ConstantIntegerInfoStruct();
+        info.Tag = tag;
+        info.Bytes = ByteUtils.ReadUInt32(data, ref offset);
+        return info;
+    }
+
     public static ConstantIntegerInfoStruct FromBytes(byte[] data, ref int offset)
     {
         var info = new ConstantIntegerInfoStruct();

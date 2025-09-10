@@ -16,6 +16,15 @@ public class ConstantFieldrefInfoStruct
     public ushort ClassIndex { get; set; }
     public ushort NameAndTypeIndex { get; set; }
     
+    public static ConstantFieldrefInfoStruct FromBytesWithTag(byte tag, byte[] data, ref int offset)
+    {
+        var info = new ConstantFieldrefInfoStruct();
+        info.Tag = tag;
+        info.ClassIndex = ByteUtils.ReadUInt16(data, ref offset);
+        info.NameAndTypeIndex = ByteUtils.ReadUInt16(data, ref offset);
+        return info;
+    }
+
     public static ConstantFieldrefInfoStruct FromBytes(byte[] data, ref int offset)
     {
         var info = new ConstantFieldrefInfoStruct();

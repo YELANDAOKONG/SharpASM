@@ -14,6 +14,14 @@ public class ConstantPackageInfoStruct
     public byte Tag { get; set; } = (byte)ConstantPoolTag.Package;
     public ushort NameIndex { get; set; } 
     
+    public static ConstantPackageInfoStruct FromBytesWithTag(byte tag, byte[] data, ref int offset)
+    {
+        var info = new ConstantPackageInfoStruct();
+        info.Tag = tag;
+        info.NameIndex = ByteUtils.ReadUInt16(data, ref offset);
+        return info;
+    }
+
     public static ConstantPackageInfoStruct FromBytes(byte[] data, ref int offset)
     {
         var info = new ConstantPackageInfoStruct();

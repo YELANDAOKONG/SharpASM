@@ -16,6 +16,15 @@ public class ConstantLongInfoStruct
     public uint HighBytes { get; set; } 
     public uint LowBytes { get; set; }
     
+    public static ConstantLongInfoStruct FromBytesWithTag(byte tag, byte[] data, ref int offset)
+    {
+        var info = new ConstantLongInfoStruct();
+        info.Tag = tag;
+        info.HighBytes = ByteUtils.ReadUInt32(data, ref offset);
+        info.LowBytes = ByteUtils.ReadUInt32(data, ref offset);
+        return info;
+    }
+    
     public static ConstantLongInfoStruct FromBytes(byte[] data, ref int offset)
     {
         var info = new ConstantLongInfoStruct();

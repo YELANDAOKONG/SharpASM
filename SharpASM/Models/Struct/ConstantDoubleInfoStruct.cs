@@ -16,6 +16,15 @@ public class ConstantDoubleInfoStruct
     public uint HighBytes { get; set; } 
     public uint LowBytes { get; set; }
     
+    public static ConstantDoubleInfoStruct FromBytesWithTag(byte tag, byte[] data, ref int offset)
+    {
+        var info = new ConstantDoubleInfoStruct();
+        info.Tag = tag;
+        info.HighBytes = ByteUtils.ReadUInt32(data, ref offset);
+        info.LowBytes = ByteUtils.ReadUInt32(data, ref offset);
+        return info;
+    }
+
     public static ConstantDoubleInfoStruct FromBytes(byte[] data, ref int offset)
     {
         var info = new ConstantDoubleInfoStruct();

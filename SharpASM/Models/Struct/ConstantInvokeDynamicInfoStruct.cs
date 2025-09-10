@@ -16,6 +16,15 @@ public class ConstantInvokeDynamicInfoStruct
     public ushort BootstrapMethodAttrIndex { get; set; } 
     public ushort NameAndTypeIndex { get; set; } 
     
+    public static ConstantInvokeDynamicInfoStruct FromBytesWithTag(byte tag, byte[] data, ref int offset)
+    {
+        var info = new ConstantInvokeDynamicInfoStruct();
+        info.Tag = tag;
+        info.BootstrapMethodAttrIndex = ByteUtils.ReadUInt16(data, ref offset);
+        info.NameAndTypeIndex = ByteUtils.ReadUInt16(data, ref offset);
+        return info;
+    }
+
     public static ConstantInvokeDynamicInfoStruct FromBytes(byte[] data, ref int offset)
     {
         var info = new ConstantInvokeDynamicInfoStruct();

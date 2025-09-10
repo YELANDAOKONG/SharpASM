@@ -16,6 +16,15 @@ public class ConstantMethodHandleInfoStruct
     public byte ReferenceKind { get; set; } 
     public ushort ReferenceIndex { get; set; } 
     
+    public static ConstantMethodHandleInfoStruct FromBytesWithTag(byte tag, byte[] data, ref int offset)
+    {
+        var info = new ConstantMethodHandleInfoStruct();
+        info.Tag = tag;
+        info.ReferenceKind = data[offset++];
+        info.ReferenceIndex = ByteUtils.ReadUInt16(data, ref offset);
+        return info;
+    }
+    
     public static ConstantMethodHandleInfoStruct FromBytes(byte[] data, ref int offset)
     {
         var info = new ConstantMethodHandleInfoStruct();

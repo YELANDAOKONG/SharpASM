@@ -14,6 +14,14 @@ public class ConstantMethodTypeInfoStruct
     public byte Tag { get; set; } = (byte)ConstantPoolTag.MethodType;
     public ushort DescriptorIndex { get; set; } 
     
+    public static ConstantMethodTypeInfoStruct FromBytesWithTag(byte tag, byte[] data, ref int offset)
+    {
+        var info = new ConstantMethodTypeInfoStruct();
+        info.Tag = tag;
+        info.DescriptorIndex = ByteUtils.ReadUInt16(data, ref offset);
+        return info;
+    }
+
     public static ConstantMethodTypeInfoStruct FromBytes(byte[] data, ref int offset)
     {
         var info = new ConstantMethodTypeInfoStruct();

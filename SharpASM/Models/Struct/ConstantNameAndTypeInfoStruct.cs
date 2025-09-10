@@ -16,6 +16,15 @@ public class ConstantNameAndTypeInfoStruct
     public ushort NameIndex { get; set; } 
     public ushort DescriptorIndex { get; set; }
     
+    public static ConstantNameAndTypeInfoStruct FromBytesWithTag(byte tag, byte[] data, ref int offset)
+    {
+        var info = new ConstantNameAndTypeInfoStruct();
+        info.Tag = tag;
+        info.NameIndex = ByteUtils.ReadUInt16(data, ref offset);
+        info.DescriptorIndex = ByteUtils.ReadUInt16(data, ref offset);
+        return info;
+    }
+    
     public static ConstantNameAndTypeInfoStruct FromBytes(byte[] data, ref int offset)
     {
         var info = new ConstantNameAndTypeInfoStruct();

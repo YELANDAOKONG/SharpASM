@@ -14,8 +14,6 @@
 
     <ItemGroup>
       <Folder Include="Core\" />
-      <Folder Include="Parsers\" />
-      <Folder Include="Utilities\" />
     </ItemGroup>
 
 </Project>

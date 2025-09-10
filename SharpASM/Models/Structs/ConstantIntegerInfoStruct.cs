@@ -1,4 +1,5 @@
 using SharpASM.Models.Type;
+using SharpASM.Utilities;
 
 namespace SharpASM.Models.Structs;
 
@@ -12,4 +13,32 @@ public class ConstantIntegerInfoStruct
      */
     public byte Tag { get; set; } = (byte)ConstantPoolTag.Integer;
     public uint Bytes { get; set; } 
+    
+    public static ConstantIntegerInfoStruct FromBytes(byte[] data, ref int offset)
+    {
+        var info = new ConstantIntegerInfoStruct();
+        info.Tag = data[offset++];
+        info.Bytes = ByteUtils.ReadUInt32(data, ref offset);
+        return info;
+    }
+        
+    public byte[] ToBytes()
+    {
+        using (var stream = new MemoryStream())
+        {
+            stream.WriteByte(Tag);
+            ByteUtils.WriteUInt32(Bytes, stream);
+            return stream.ToArray();
+        }
+    }
+        
+    public int GetValue()
+    {
+        return (int)Bytes;
+    }
+        
+    public void SetValue(int value)
+    {
+        Bytes = (uint)value;
+    }
 }

@@ -1,4 +1,5 @@
 using SharpASM.Models.Type;
+using SharpASM.Utilities;
 
 namespace SharpASM.Models.Structs;
 
@@ -14,4 +15,24 @@ public class ConstantInvokeDynamicInfoStruct
     public byte Tag { get; set; } = (byte)ConstantPoolTag.InvokeDynamic;
     public ushort BootstrapMethodAttrIndex { get; set; } 
     public ushort NameAndTypeIndex { get; set; } 
+    
+    public static ConstantInvokeDynamicInfoStruct FromBytes(byte[] data, ref int offset)
+    {
+        var info = new ConstantInvokeDynamicInfoStruct();
+        info.Tag = data[offset++];
+        info.BootstrapMethodAttrIndex = ByteUtils.ReadUInt16(data, ref offset);
+        info.NameAndTypeIndex = ByteUtils.ReadUInt16(data, ref offset);
+        return info;
+    }
+    
+    public byte[] ToBytes()
+    {
+        using (var stream = new MemoryStream())
+        {
+            stream.WriteByte(Tag);
+            ByteUtils.WriteUInt16(BootstrapMethodAttrIndex, stream);
+            ByteUtils.WriteUInt16(NameAndTypeIndex, stream);
+            return stream.ToArray();
+        }
+    }
 }

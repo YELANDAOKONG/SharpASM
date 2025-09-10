@@ -1,3 +1,4 @@
+using System.Text;
 using SharpASM.Models.Type;
 
 namespace SharpASM.Models.Structs;
@@ -45,4 +46,90 @@ public class ClassStruct
     public MethodInfoStruct[] Methods { get; set; } = [];
     public ushort AttributesCount { get; set; }
     public AttributeInfoStruct[] Attributes { get; set; } = [];
+
+    public override string ToString()
+    {
+        StringBuilder builder = new();
+        builder.Append("@Class {");
+        builder.Append($"    Magic: 0x{Magic:X},");
+        builder.Append($"    MinorVersion: {MinorVersion},");
+        builder.Append($"    MajorVersion: {MajorVersion},");
+        builder.Append($"    ConstantPoolCount: {ConstantPoolCount},");
+        builder.Append($"    ConstantPool: [");
+        foreach (var poolInfoStruct in ConstantPool)
+        {
+            builder.Append($"        {{");
+            builder.Append($"            Tag: {poolInfoStruct.Tag},");
+            builder.Append($"            Info: 0x{BitConverter.ToString(poolInfoStruct.Info)},");
+            builder.Append($"        }},");
+        }
+        builder.Append($"    ],");
+        builder.Append($"    AccessFlags: {AccessFlags},");
+        builder.Append($"    ThisClass: {ThisClass},");
+        builder.Append($"    SuperClass: {SuperClass},");
+        builder.Append($"    InterfacesCount: {InterfacesCount},");
+        builder.Append($"    Interfaces: [");
+        foreach (var @interface in Interfaces)
+        {
+            builder.Append($"        {@interface},");
+        }
+        builder.Append($"    ],");
+        builder.Append($"    FieldsCount: {FieldsCount},");
+        builder.Append($"    Fields: [");
+        foreach (var field in Fields)
+        {
+            builder.Append($"        {{");
+            builder.Append($"            AccessFlags: {field.AccessFlags},");
+            builder.Append($"            NameIndex: {field.NameIndex},");
+            builder.Append($"            DescriptorIndex: {field.DescriptorIndex},");
+            builder.Append($"            AttributesCount: {field.AttributesCount},");
+            builder.Append($"            Attributes: [");
+            foreach (var attribute in field.Attributes)
+            {
+                builder.Append($"                {{");
+                builder.Append($"                    AttributeNameIndex: {attribute.AttributeNameIndex},");
+                builder.Append($"                    AttributeLength: {attribute.AttributeLength},");
+                builder.Append($"                    Info: 0x{BitConverter.ToString(attribute.Info)},");
+                builder.Append($"                }}");
+            }
+            builder.Append($"            ],");
+            builder.Append($"        }},");
+        }
+        builder.Append($"    ],");
+        builder.Append($"    MethodsCount: {MethodsCount},");
+        builder.Append($"    Methods: [");
+        foreach (var method in Methods)
+        {
+            builder.Append($"        {{");
+            builder.Append($"            AccessFlags: {method.AccessFlags},");
+            builder.Append($"            NameIndex: {method.NameIndex},");
+            builder.Append($"            DescriptorIndex: {method.DescriptorIndex},");
+            builder.Append($"            AttributesCount: {method.AttributesCount},");
+            builder.Append($"            Attributes: [");
+            foreach (var attribute in method.Attributes)
+            {
+                builder.Append($"                {{");
+                builder.Append($"                    AttributeNameIndex: {attribute.AttributeNameIndex},");
+                builder.Append($"                    AttributeLength: {attribute.AttributeLength},");
+                builder.Append($"                    Info: 0x{BitConverter.ToString(attribute.Info)},");
+                builder.Append($"                }}");
+            }
+            builder.Append($"            ],");
+            builder.Append($"        }},");
+        }
+        builder.Append($"    ],");
+        builder.Append($"    AttributesCount: {AttributesCount},");
+        builder.Append($"    Attributes: [");
+        foreach (var attribute in Attributes)
+        {
+            builder.Append($"        {{");
+            builder.Append($"            AttributeNameIndex: {attribute.AttributeNameIndex}");
+            builder.Append($"            AttributeLength: {attribute.AttributeLength},");
+            builder.Append($"            Info: 0x{BitConverter.ToString(attribute.Info)},");
+            builder.Append($"        }},");
+        }
+        builder.Append($"    ],");
+        builder.Append("}");
+        return builder.ToString();
+    }
 }

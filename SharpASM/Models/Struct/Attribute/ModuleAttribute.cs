@@ -41,4 +41,52 @@ public class ModuleAttribute
            } provides[provides_count];
        }
      */
+    
+    public class RequireStruct {   
+        public ushort RequiresIndex { get; set; }
+        public ushort RequiresFlags { get; set; }
+        public ushort RequiresVersionIndex { get; set; }
+    } 
+    
+    public class ExportStruct { 
+        public ushort ExportsIndex { get; set; }
+        public ushort ExportsFlags { get; set; }
+        public ushort ExportsToCount { get; set; }
+        public ushort[] ExportsToIndex { get; set; } = [];
+    }
+    
+    public class OpenStruct {   
+        public ushort OpensIndex { get; set; }
+        public ushort OpensFlags { get; set; }
+        public ushort OpensToCount { get; set; }
+        public ushort[] OpensToIndex{ get; set; } = [];
+    } 
+    
+    public class ProvideStruct {
+        public ushort ProvidesIndex { get; set; }
+        public ushort ProvidesWithCount { get; set; }
+        public ushort[] ProvidesWithIndex { get; set; } = [];
+    } 
+    
+    public ushort AttributeNameIndex { get; set; }
+    public uint AttributeLength { get; set; }
+       
+    public ushort ModuleNameIndex { get; set; }
+    public ushort ModuleFlags { get; set; }
+    public ushort ModuleVersionIndex { get; set; }
+       
+    public ushort RequiresCount { get; set; }
+    public RequireStruct[] Requires { get; set; } = [];
+       
+    public ushort ExportsCount { get; set; }
+    public ExportStruct[] Exports { get; set; } = []; 
+       
+    public ushort OpensCount { get; set; }
+    public OpenStruct[] Opens { get; set; } = [];
+       
+    public ushort UsesCount { get; set; }
+    public ushort[] UsesIndex { get; set; } = [];
+       
+    public ushort ProvidesCount { get; set; }
+    public ProvideStruct[] Provides { get; set; }  = [];
 }

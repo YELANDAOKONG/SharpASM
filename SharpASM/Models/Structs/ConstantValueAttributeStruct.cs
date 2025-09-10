@@ -10,5 +10,7 @@ public class ConstantValueAttributeStruct
        }
      */
     
-    // TODO...
+    public ushort AttributeNameIndex { get; set; }
+    public uint AttributeLength { get; set; }
+    public ushort ConstantValueIndex { get; set; }
 }

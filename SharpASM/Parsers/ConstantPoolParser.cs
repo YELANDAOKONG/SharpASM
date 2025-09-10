@@ -1,7 +1,7 @@
-using SharpASM.Models.Structs;
 using SharpASM.Models.Type;
 using System;
 using System.Collections.Generic;
+using SharpASM.Models.Struct;
 
 namespace SharpASM.Parsers;
 

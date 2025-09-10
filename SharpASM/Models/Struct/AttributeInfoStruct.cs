@@ -1,6 +1,6 @@
 using SharpASM.Utilities;
 
-namespace SharpASM.Models.Structs;
+namespace SharpASM.Models.Struct;
 
 public class AttributeInfoStruct
 {

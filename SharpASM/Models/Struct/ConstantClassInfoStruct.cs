@@ -1,27 +1,27 @@
 using SharpASM.Models.Type;
 using SharpASM.Utilities;
 
-namespace SharpASM.Models.Structs;
+namespace SharpASM.Models.Struct;
 
-public class ConstantModuleInfoStruct
+public class ConstantClassInfoStruct
 {
     /*
-     * CONSTANT_Module_info {
+     * CONSTANT_Class_info {
            u1 tag;
            u2 name_index;
        }
      */
-    public byte Tag { get; set; } = (byte)ConstantPoolTag.Module;
-    public ushort NameIndex { get; set; } 
+    public byte Tag { get; set; } = (byte)ConstantPoolTag.Class;
+    public ushort NameIndex { get; set; }
     
-    public static ConstantModuleInfoStruct FromBytes(byte[] data, ref int offset)
+    public static ConstantClassInfoStruct FromBytes(byte[] data, ref int offset)
     {
-        var info = new ConstantModuleInfoStruct();
+        var info = new ConstantClassInfoStruct();
         info.Tag = data[offset++];
         info.NameIndex = ByteUtils.ReadUInt16(data, ref offset);
         return info;
     }
-        
+    
     public byte[] ToBytes()
     {
         using (var stream = new MemoryStream())

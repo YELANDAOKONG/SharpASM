@@ -1,4 +1,4 @@
-namespace SharpASM.Models.Structs;
+namespace SharpASM.Models.Struct;
 
 public class CodeAttributeStruct
 {

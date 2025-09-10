@@ -6,5 +6,6 @@ public abstract class ConstantPoolInfo
 {
     public abstract ConstantPoolTag Tag { get; }
     
-    // TODO...
+    public abstract byte[] ToBytes();
+    public abstract override string ToString();
 }

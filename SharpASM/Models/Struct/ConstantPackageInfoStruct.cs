@@ -1,22 +1,22 @@
 using SharpASM.Models.Type;
 using SharpASM.Utilities;
 
-namespace SharpASM.Models.Structs;
+namespace SharpASM.Models.Struct;
 
-public class ConstantStringInfoStruct
+public class ConstantPackageInfoStruct
 {
     /*
-     * CONSTANT_String_info {
+     * CONSTANT_Package_info {
            u1 tag;
-           u2 string_index;
+           u2 name_index;
        }
      */
-    public byte Tag { get; set; } = (byte)ConstantPoolTag.String;
-    public ushort NameIndex { get; set; }
+    public byte Tag { get; set; } = (byte)ConstantPoolTag.Package;
+    public ushort NameIndex { get; set; } 
     
-    public static ConstantStringInfoStruct FromBytes(byte[] data, ref int offset)
+    public static ConstantPackageInfoStruct FromBytes(byte[] data, ref int offset)
     {
-        var info = new ConstantStringInfoStruct();
+        var info = new ConstantPackageInfoStruct();
         info.Tag = data[offset++];
         info.NameIndex = ByteUtils.ReadUInt16(data, ref offset);
         return info;

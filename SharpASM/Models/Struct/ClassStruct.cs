@@ -1,7 +1,7 @@
 using System.Text;
 using SharpASM.Models.Type;
 
-namespace SharpASM.Models.Structs;
+namespace SharpASM.Models.Struct;
 
 public class ClassStruct
 {

@@ -1,9 +1,9 @@
-namespace SharpASM.Models.Structs;
+namespace SharpASM.Models.Struct;
 
-public class FieldInfoStruct
+public class MethodInfoStruct
 {
     /*
-     * field_info {
+     * method_info {
            u2             access_flags;
            u2             name_index;
            u2             descriptor_index;

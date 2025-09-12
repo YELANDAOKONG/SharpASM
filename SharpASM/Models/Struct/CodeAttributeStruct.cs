@@ -1,6 +1,8 @@
+using SharpASM.Models.Struct.Interfaces;
+
 namespace SharpASM.Models.Struct;
 
-public class CodeAttributeStruct
+public class CodeAttributeStruct : IAttributeStruct
 {
     /*
      * Code_attribute {

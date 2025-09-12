@@ -50,18 +50,10 @@ public class ClassStruct
 
     #region Functions
 
-    public void AppendConstantPoolInfo(ConstantPoolInfoStruct @struct, bool setCount = true)
+    public void AppendConstantPoolInfo(ConstantPoolInfoStruct cpInfo)
     {
-        var array = new List<ConstantPoolInfoStruct>(ConstantPool) { @struct };
-        ConstantPool = array.ToArray();
-        if (setCount) ConstantPoolCount++;
-        if (setCount)
-        {
-            if (@struct.Tag == (ushort)ConstantPoolTag.Long || @struct.Tag == (ushort)ConstantPoolTag.Double)
-            {
-                ConstantPoolCount++;
-            }
-        }
+        var list = new List<ConstantPoolInfoStruct>(ConstantPool) { cpInfo };
+        ConstantPool = list.ToArray();
     }
 
     #endregion

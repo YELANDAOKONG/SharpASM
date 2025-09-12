@@ -730,6 +730,10 @@ public class ConstantPoolHelper
 
     #endregion
 
+    public List<ConstantPoolInfo> ToList()
+    {
+        return ConstantPool;
+    }
 
     public ConstantPoolInfoStruct[] ToArray()
     {

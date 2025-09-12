@@ -48,12 +48,16 @@ public class ClassStruct
     public ushort AttributesCount { get; set; }
     public AttributeInfoStruct[] Attributes { get; set; } = [];
 
+    #region Functions
+
     public void AppendConstantPoolInfo(ConstantPoolInfoStruct @struct, bool setCount = true)
     {
         var array = new List<ConstantPoolInfoStruct>(ConstantPool) { @struct };
         ConstantPool = array.ToArray();
         if (setCount) ConstantPoolCount++;
     }
+
+    #endregion
 
     public override string ToString()
     {

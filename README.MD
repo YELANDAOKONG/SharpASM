@@ -278,7 +278,7 @@ ushort printlnMethodRefIndex = helper.NewMethodref(printStreamClassIndex, printl
 ushort helloWorldUtf8Index = helper.NewUtf8("Hello World");
 ushort helloWorldStringIndex = helper.NewString(helloWorldUtf8Index);
 
-// 创建 Code 属性
+// 创建 "Code" 属性
 ushort codeAttributeNameIndex = helper.NewUtf8("Code");
 
 using var codeStream = new MemoryStream();
@@ -345,240 +345,240 @@ Console.WriteLine(clazz);
     ConstantPoolCount: 60,
     ConstantPool: [
         {
-Tag: 10 (Methodref),
-Info: 0x00020003,
+            Tag: 10 (Methodref),
+            Info: 0x00020003,
         },
         {
-Tag: 7 (Class),
-Info: 0x0004,
+            Tag: 7 (Class),
+            Info: 0x0004,
         },
         {
-Tag: 12 (NameAndType),
-Info: 0x00050006,
+            Tag: 12 (NameAndType),
+            Info: 0x00050006,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00106A6176612F6C616E672F4F626A656374,
+            Tag: 1 (Utf8),
+            Info: 0x00106A6176612F6C616E672F4F626A656374,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00063C696E69743E,
+            Tag: 1 (Utf8),
+            Info: 0x00063C696E69743E,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x0003282956,
+            Tag: 1 (Utf8),
+            Info: 0x0003282956,
         },
         {
-Tag: 9 (Fieldref),
-Info: 0x00080009,
+            Tag: 9 (Fieldref),
+            Info: 0x00080009,
         },
         {
-Tag: 7 (Class),
-Info: 0x000A,
+            Tag: 7 (Class),
+            Info: 0x000A,
         },
         {
-Tag: 12 (NameAndType),
-Info: 0x000B000C,
+            Tag: 12 (NameAndType),
+            Info: 0x000B000C,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00106A6176612F6C616E672F53797374656D,
+            Tag: 1 (Utf8),
+            Info: 0x00106A6176612F6C616E672F53797374656D,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00036F7574,
+            Tag: 1 (Utf8),
+            Info: 0x00036F7574,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00154C6A6176612F696F2F5072696E7453747265616D3B,
+            Tag: 1 (Utf8),
+            Info: 0x00154C6A6176612F696F2F5072696E7453747265616D3B,
         },
         {
-Tag: 8 (String),
-Info: 0x000E,
+            Tag: 8 (String),
+            Info: 0x000E,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x001248656C6C6F20616E642077656C636F6D6521,
+            Tag: 1 (Utf8),
+            Info: 0x001248656C6C6F20616E642077656C636F6D6521,
         },
         {
-Tag: 10 (Methodref),
-Info: 0x00100011,
+            Tag: 10 (Methodref),
+            Info: 0x00100011,
         },
         {
-Tag: 7 (Class),
-Info: 0x0012,
+            Tag: 7 (Class),
+            Info: 0x0012,
         },
         {
-Tag: 12 (NameAndType),
-Info: 0x00130014,
+            Tag: 12 (NameAndType),
+            Info: 0x00130014,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00136A6176612F696F2F5072696E7453747265616D,
+            Tag: 1 (Utf8),
+            Info: 0x00136A6176612F696F2F5072696E7453747265616D,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00067072696E7466,
+            Tag: 1 (Utf8),
+            Info: 0x00067072696E7466,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x003C284C6A6176612F6C616E672F537472696E673B5B4C6A6176612F6C616E672F4F626A6563743B294C6A6176612F696F2F5072696E7453747265616D3B,
+            Tag: 1 (Utf8),
+            Info: 0x003C284C6A6176612F6C616E672F537472696E673B5B4C6A6176612F6C616E672F4F626A6563743B294C6A6176612F696F2F5072696E7453747265616D3B,
         },
         {
-Tag: 18 (InvokeDynamic),
-Info: 0x00000016,
+            Tag: 18 (InvokeDynamic),
+            Info: 0x00000016,
         },
         {
-Tag: 12 (NameAndType),
-Info: 0x00170018,
+            Tag: 12 (NameAndType),
+            Info: 0x00170018,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00176D616B65436F6E63617457697468436F6E7374616E7473,
+            Tag: 1 (Utf8),
+            Info: 0x00176D616B65436F6E63617457697468436F6E7374616E7473,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00152849294C6A6176612F6C616E672F537472696E673B,
+            Tag: 1 (Utf8),
+            Info: 0x00152849294C6A6176612F6C616E672F537472696E673B,
         },
         {
-Tag: 10 (Methodref),
-Info: 0x0010001A,
+            Tag: 10 (Methodref),
+            Info: 0x0010001A,
         },
         {
-Tag: 12 (NameAndType),
-Info: 0x001B001C,
+            Tag: 12 (NameAndType),
+            Info: 0x001B001C,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00077072696E746C6E,
+            Tag: 1 (Utf8),
+            Info: 0x00077072696E746C6E,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x0015284C6A6176612F6C616E672F537472696E673B2956,
+            Tag: 1 (Utf8),
+            Info: 0x0015284C6A6176612F6C616E672F537472696E673B2956,
         },
         {
-Tag: 7 (Class),
-Info: 0x001E,
+            Tag: 7 (Class),
+            Info: 0x001E,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00044D61696E,
+            Tag: 1 (Utf8),
+            Info: 0x00044D61696E,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x0004436F6465,
+            Tag: 1 (Utf8),
+            Info: 0x0004436F6465,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x000F4C696E654E756D6265725461626C65,
+            Tag: 1 (Utf8),
+            Info: 0x000F4C696E654E756D6265725461626C65,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00124C6F63616C5661726961626C655461626C65,
+            Tag: 1 (Utf8),
+            Info: 0x00124C6F63616C5661726961626C655461626C65,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x000474686973,
+            Tag: 1 (Utf8),
+            Info: 0x000474686973,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00064C4D61696E3B,
+            Tag: 1 (Utf8),
+            Info: 0x00064C4D61696E3B,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00046D61696E,
+            Tag: 1 (Utf8),
+            Info: 0x00046D61696E,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x0016285B4C6A6176612F6C616E672F537472696E673B2956,
+            Tag: 1 (Utf8),
+            Info: 0x0016285B4C6A6176612F6C616E672F537472696E673B2956,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x000169,
+            Tag: 1 (Utf8),
+            Info: 0x000169,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x000149,
+            Tag: 1 (Utf8),
+            Info: 0x000149,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x000461726773,
+            Tag: 1 (Utf8),
+            Info: 0x000461726773,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00135B4C6A6176612F6C616E672F537472696E673B,
+            Tag: 1 (Utf8),
+            Info: 0x00135B4C6A6176612F6C616E672F537472696E673B,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x000D537461636B4D61705461626C65,
+            Tag: 1 (Utf8),
+            Info: 0x000D537461636B4D61705461626C65,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x000A536F7572636546696C65,
+            Tag: 1 (Utf8),
+            Info: 0x000A536F7572636546696C65,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00094D61696E2E6A617661,
+            Tag: 1 (Utf8),
+            Info: 0x00094D61696E2E6A617661,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x0010426F6F7473747261704D6574686F6473,
+            Tag: 1 (Utf8),
+            Info: 0x0010426F6F7473747261704D6574686F6473,
         },
         {
-Tag: 8 (String),
-Info: 0x002F,
+            Tag: 8 (String),
+            Info: 0x002F,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x000569203D2001,
+            Tag: 1 (Utf8),
+            Info: 0x000569203D2001,
         },
         {
-Tag: 15 (MethodHandle),
-Info: 0x060031,
+            Tag: 15 (MethodHandle),
+            Info: 0x060031,
         },
         {
-Tag: 10 (Methodref),
-Info: 0x00320033,
+            Tag: 10 (Methodref),
+            Info: 0x00320033,
         },
         {
-Tag: 7 (Class),
-Info: 0x0034,
+            Tag: 7 (Class),
+            Info: 0x0034,
         },
         {
-Tag: 12 (NameAndType),
-Info: 0x00170035,
+            Tag: 12 (NameAndType),
+            Info: 0x00170035,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00246A6176612F6C616E672F696E766F6B652F537472696E67436F6E636174466163746F7279,
+            Tag: 1 (Utf8),
+            Info: 0x00246A6176612F6C616E672F696E766F6B652F537472696E67436F6E636174466163746F7279,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x0098284C6A6176612F6C616E672F696E766F6B652F4D6574686F6448616E646C6573244C6F6F6B75703B4C6A6176612F6C616E672F537472696E673B4C6A6176612F6C616E672F696E766F6B652F4D6574686F64547970653B4C6A6176612F6C616E672F537472696E673B5B4C6A6176612F6C616E672F4F626A6563743B294C6A6176612F6C616E672F696E766F6B652F43616C6C536974653B,
+            Tag: 1 (Utf8),
+            Info: 0x0098284C6A6176612F6C616E672F696E766F6B652F4D6574686F6448616E646C6573244C6F6F6B75703B4C6A6176612F6C616E672F537472696E673B4C6A6176612F6C616E672F696E766F6B652F4D6574686F64547970653B4C6A6176612F6C616E672F537472696E673B5B4C6A6176612F6C616E672F4F626A6563743B294C6A6176612F6C616E672F696E766F6B652F43616C6C536974653B,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x000C496E6E6572436C6173736573,
+            Tag: 1 (Utf8),
+            Info: 0x000C496E6E6572436C6173736573,
         },
         {
-Tag: 7 (Class),
-Info: 0x0038,
+            Tag: 7 (Class),
+            Info: 0x0038,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00256A6176612F6C616E672F696E766F6B652F4D6574686F6448616E646C6573244C6F6F6B7570,
+            Tag: 1 (Utf8),
+            Info: 0x00256A6176612F6C616E672F696E766F6B652F4D6574686F6448616E646C6573244C6F6F6B7570,
         },
         {
-Tag: 7 (Class),
-Info: 0x003A,
+            Tag: 7 (Class),
+            Info: 0x003A,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x001E6A6176612F6C616E672F696E766F6B652F4D6574686F6448616E646C6573,
+            Tag: 1 (Utf8),
+            Info: 0x001E6A6176612F6C616E672F696E766F6B652F4D6574686F6448616E646C6573,
         },
         {
-Tag: 1 (Utf8),
-Info: 0x00064C6F6F6B7570,
+            Tag: 1 (Utf8),
+            Info: 0x00064C6F6F6B7570,
         },
     ],
     AccessFlags: 33 ( Public | Super ),
@@ -593,48 +593,48 @@ Info: 0x00064C6F6F6B7570,
     MethodsCount: 2,
     Methods: [
         {
-AccessFlags: 1 ( Public ),
-NameIndex: 5,
-DescriptorIndex: 6,
-AttributesCount: 1,
-Attributes: [
-    {
-        AttributeNameIndex: 31,
-        AttributeLength: 47,
-        Info: 0x00010001000000052AB70001B10000000200200000000600010000000300210000000C000100000005002200230000,
-    }
-],
+            AccessFlags: 1 ( Public ),
+            NameIndex: 5,
+            DescriptorIndex: 6,
+            AttributesCount: 1,
+            Attributes: [
+                {
+                    AttributeNameIndex: 31,
+                    AttributeLength: 47,
+                    Info: 0x00010001000000052AB70001B10000000200200000000600010000000300210000000C000100000005002200230000,
+                }
+            ],
         },
         {
-AccessFlags: 9 ( Public | Static ),
-NameIndex: 36,
-DescriptorIndex: 37,
-AttributesCount: 1,
-Attributes: [
-    {
-        AttributeNameIndex: 31,
-        AttributeLength: 122,
-        Info: 0x0003000200000027B20007120D03BD0002B6000F57043C1B08A30015B200071BBA00150000B60019840101A7FFECB100000003002000000016000500000007000D00090014000C002000090026000E0021000000160002000F001700260027000100000027002800290000002A000000090002FC000F01FA0016,
-    }
-],
+            AccessFlags: 9 ( Public | Static ),
+            NameIndex: 36,
+            DescriptorIndex: 37,
+            AttributesCount: 1,
+            Attributes: [
+                {
+                    AttributeNameIndex: 31,
+                    AttributeLength: 122,
+                    Info: 0x0003000200000027B20007120D03BD0002B6000F57043C1B08A30015B200071BBA00150000B60019840101A7FFECB100000003002000000016000500000007000D00090014000C002000090026000E0021000000160002000F001700260027000100000027002800290000002A000000090002FC000F01FA0016,
+                }
+            ],
         },
     ],
     AttributesCount: 3,
     Attributes: [
         {
-AttributeNameIndex: 43
-AttributeLength: 2,
-Info: 0x002C,
+            AttributeNameIndex: 43
+            AttributeLength: 2,
+            Info: 0x002C,
         },
         {
-AttributeNameIndex: 45
-AttributeLength: 8,
-Info: 0x000100300001002E,
+            AttributeNameIndex: 45
+            AttributeLength: 8,
+            Info: 0x000100300001002E,
         },
         {
-AttributeNameIndex: 54
-AttributeLength: 10,
-Info: 0x000100370039003B0019,
+            AttributeNameIndex: 54
+            AttributeLength: 10,
+            Info: 0x000100370039003B0019,
         },
     ],
 }

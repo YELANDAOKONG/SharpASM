@@ -271,19 +271,19 @@ public static class ClassParser
                 tempOffset = 0; // 修复：重置偏移量
                 stringInfo.NameIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 return stringInfo;
-                
+            
             case ConstantPoolTag.Integer:
                 var integerInfo = new ConstantIntegerInfoStruct();
                 integerInfo.Tag = cpInfo.Tag;
-                tempOffset = 0; // 修复：重置偏移量
-                integerInfo.Bytes = BitConverter.ToUInt32(cpInfo.Info, tempOffset);
+                tempOffset = 0;
+                integerInfo.Bytes = ByteUtils.ReadUInt32(cpInfo.Info, ref tempOffset);
                 return integerInfo;
                 
             case ConstantPoolTag.Float:
                 var floatInfo = new ConstantFloatInfoStruct();
                 floatInfo.Tag = cpInfo.Tag;
-                tempOffset = 0; // 修复：重置偏移量
-                floatInfo.Bytes = BitConverter.ToUInt32(cpInfo.Info, tempOffset);
+                tempOffset = 0;
+                floatInfo.Bytes = ByteUtils.ReadUInt32(cpInfo.Info, ref tempOffset);
                 return floatInfo;
                 
             case ConstantPoolTag.Long:

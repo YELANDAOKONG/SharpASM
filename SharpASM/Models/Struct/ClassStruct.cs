@@ -48,10 +48,11 @@ public class ClassStruct
     public ushort AttributesCount { get; set; }
     public AttributeInfoStruct[] Attributes { get; set; } = [];
 
-    public void AppendConstantPoolInfo(ConstantPoolInfoStruct @struct)
+    public void AppendConstantPoolInfo(ConstantPoolInfoStruct @struct, bool setCount = true)
     {
         var array = new List<ConstantPoolInfoStruct>(ConstantPool) { @struct };
         ConstantPool = array.ToArray();
+        if (setCount) ConstantPoolCount++;
     }
 
     public override string ToString()

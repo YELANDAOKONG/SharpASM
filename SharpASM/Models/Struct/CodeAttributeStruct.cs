@@ -1,4 +1,5 @@
 using SharpASM.Models.Struct.Interfaces;
+using SharpASM.Utilities;
 
 namespace SharpASM.Models.Struct;
 
@@ -47,16 +48,48 @@ public class CodeAttributeStruct : IAttributeStruct
     
     public byte[] ToBytes()
     {
-        throw new NotImplementedException();
+        return ToStructInfo().ToBytes();
     }
 
     public byte[] ToBytesWithoutIndexAndLength()
     {
-        throw new NotImplementedException();
+        CodeLength = (uint)Code.Length;
+        ExceptionTableLength = (ushort)ExceptionTable.Length;
+        AttributesCount = (ushort)Attributes.Length;
+        using (var stream = new MemoryStream())
+        {
+            ByteUtils.WriteUInt16(MaxStack, stream);
+            ByteUtils.WriteUInt16(MaxLocals, stream);
+            ByteUtils.WriteUInt32(CodeLength, stream);
+            stream.Write(Code, 0, Code.Length);
+            
+            ByteUtils.WriteUInt16(ExceptionTableLength, stream);
+            foreach (var exception in ExceptionTable)
+            {
+                ByteUtils.WriteUInt16(exception.StartPc, stream);
+                ByteUtils.WriteUInt16(exception.EndPc, stream);
+                ByteUtils.WriteUInt16(exception.HandlerPc, stream);
+                ByteUtils.WriteUInt16(exception.CatchType, stream);
+            }
+            
+            ByteUtils.WriteUInt16(AttributesCount, stream);
+            foreach (var attribute in Attributes)
+            {
+                var attrBytes = attribute.ToBytes();
+                stream.Write(attrBytes, 0, attrBytes.Length);
+            }
+            return stream.ToArray();
+        }
     }
 
     public AttributeInfoStruct ToStructInfo()
     {
-        throw new NotImplementedException();
+        var infoBytes = ToBytesWithoutIndexAndLength();
+        return new AttributeInfoStruct
+        {
+            AttributeNameIndex = AttributeNameIndex,
+            AttributeLength = (uint)infoBytes.Length,
+            Info = infoBytes
+        };
     }
 }

@@ -293,6 +293,106 @@ public class ConstantPoolHelper
         return index;
     }
     
+    public ushort NewFieldref(string className, string fieldName, string fieldDescriptor)
+    {
+        ushort classIndex = NewClass(className);
+        ushort nameAndTypeIndex = NewNameAndType(fieldName, fieldDescriptor);
+    
+        ushort index = CalculateConstantPoolIndexCount();
+    
+        var newFieldref = new ConstantFieldrefInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.Fieldref,
+            ClassIndex = classIndex,
+            NameAndTypeIndex = nameAndTypeIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newFieldref.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+    public ushort NewFieldref(ushort classIndex, ushort nameAndTypeIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Fieldref)
+            {
+                var cpi = (ConstantFieldrefInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.ClassIndex == classIndex && cpi.NameAndTypeIndex == nameAndTypeIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+    
+        var newFieldref = new ConstantFieldrefInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.Fieldref,
+            ClassIndex = classIndex,
+            NameAndTypeIndex = nameAndTypeIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newFieldref.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+    
+    public ushort NewMethodref(string className, string fieldName, string fieldDescriptor)
+    {
+        ushort classIndex = NewClass(className);
+        ushort nameAndTypeIndex = NewNameAndType(fieldName, fieldDescriptor);
+    
+        ushort index = CalculateConstantPoolIndexCount();
+    
+        var newMethodref = new ConstantMethodrefInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.Methodref,
+            ClassIndex = classIndex,
+            NameAndTypeIndex = nameAndTypeIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newMethodref.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+    public ushort NewMethodref(ushort classIndex, ushort nameAndTypeIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Methodref)
+            {
+                var cpi = (ConstantMethodrefInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.ClassIndex == classIndex && cpi.NameAndTypeIndex == nameAndTypeIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+    
+        var newMethodref = new ConstantMethodrefInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.Methodref,
+            ClassIndex = classIndex,
+            NameAndTypeIndex = nameAndTypeIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newMethodref.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+    
+
     
     // TODO...
     

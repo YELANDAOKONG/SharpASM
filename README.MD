@@ -8,7 +8,27 @@
 
 ## 示例
 
-### 凭空构建类 (高级 API )
+### 构建字节码 ( 字节码 API )
+
+```csharp
+// ...
+
+// 构建字节码
+var codes = new List<Code>();
+codes.Add(Code.GetStatic(systemOutFieldRefIndex));
+codes.Add(new Code(OperationCode.LDC, [Operand.Index((byte)helloWorldStrIndex)]));
+codes.Add(Code.InvokeVirtual(printlnMethodRefIndex));
+codes.Add(Code.GetStatic(systemOutFieldRefIndex));
+codes.Add(new Code(OperationCode.LDC, [Operand.Index((byte)helloCSharpStrIndex)]));
+codes.Add(Code.InvokeVirtual(printlnMethodRefIndex));
+codes.Add(new Code(OperationCode.RETURN)); 
+
+var codeBytes = ByteCodeParser.Serialize(codes);
+
+// ...
+```
+
+### 凭空构建类 ( 高级 API )
 
 ```csharp
 var clazz = new Class()

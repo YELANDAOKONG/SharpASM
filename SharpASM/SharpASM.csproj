@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageId>SharpMC.SharpASM</PackageId>
+        <Version>1.0.3.0</Version>
     </PropertyGroup>
 
     <ItemGroup>

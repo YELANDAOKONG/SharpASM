@@ -101,4 +101,58 @@ public class CodeAttributeStruct : IAttributeStruct
             Info = infoBytes
         };
     }
+
+    public static CodeAttributeStruct FromStructInfo(AttributeInfoStruct info)
+    {
+        var codeAttr = new CodeAttributeStruct
+        {
+            AttributeNameIndex = info.AttributeNameIndex,
+            AttributeLength = info.AttributeLength
+        };
+    
+        int offset = 0;
+        byte[] bytes = info.Info;
+
+        // Read max_stack (2 bytes)
+        codeAttr.MaxStack = ByteUtils.ReadUInt16(bytes, ref offset);
+    
+        // Read max_locals (2 bytes)
+        codeAttr.MaxLocals = ByteUtils.ReadUInt16(bytes, ref offset);
+    
+        // Read code_length (4 bytes)
+        codeAttr.CodeLength = ByteUtils.ReadUInt32(bytes, ref offset);
+    
+        // Read code[code_length]
+        codeAttr.Code = ByteUtils.ReadBytes(bytes, ref offset, (int)codeAttr.CodeLength);
+    
+        // Read exception_table_length (2 bytes)
+        codeAttr.ExceptionTableLength = ByteUtils.ReadUInt16(bytes, ref offset);
+    
+        // Read exception_table[exception_table_length]
+        codeAttr.ExceptionTable = new ExceptionTableStruct[codeAttr.ExceptionTableLength];
+        for (int i = 0; i < codeAttr.ExceptionTableLength; i++)
+        {
+            codeAttr.ExceptionTable[i] = new ExceptionTableStruct
+            {
+                StartPc = ByteUtils.ReadUInt16(bytes, ref offset),
+                EndPc = ByteUtils.ReadUInt16(bytes, ref offset),
+                HandlerPc = ByteUtils.ReadUInt16(bytes, ref offset),
+                CatchType = ByteUtils.ReadUInt16(bytes, ref offset)
+            };
+        }
+    
+        // Read attributes_count (2 bytes)
+        codeAttr.AttributesCount = ByteUtils.ReadUInt16(bytes, ref offset);
+    
+        // Read attributes[attributes_count]
+        codeAttr.Attributes = new AttributeInfoStruct[codeAttr.AttributesCount];
+        for (int i = 0; i < codeAttr.AttributesCount; i++)
+        {
+            codeAttr.Attributes[i] = AttributeInfoStruct.FromBytes(bytes, ref offset);
+        }
+
+        return codeAttr;
+    }
+    
+    
 }

@@ -1,6 +1,6 @@
 namespace SharpASM.Models.Code;
 
-public enum OperationCode
+public enum OperationCode : byte
 {
     NOP = 0,
     ACONST_NULL = 1,

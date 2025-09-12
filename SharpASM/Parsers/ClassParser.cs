@@ -6,6 +6,7 @@ using SharpASM.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SharpASM.Parsers;
 
@@ -28,7 +29,9 @@ public static class ClassParser
         // Read Constant Pool
         classStruct.ConstantPoolCount = ByteUtils.ReadUInt16(data, ref offset);
         var constantPool = ConstantPoolParser.ParseConstantPool(data, ref offset, classStruct.ConstantPoolCount);
-        classStruct.ConstantPool = new ConstantPoolInfoStruct[constantPool.Count];
+        
+        // 修复：常量池数组大小应该是 ConstantPoolCount - 1
+        classStruct.ConstantPool = new ConstantPoolInfoStruct[classStruct.ConstantPoolCount - 1];
         
         for (int i = 0; i < constantPool.Count; i++)
         {
@@ -94,7 +97,8 @@ public static class ClassParser
             ByteUtils.WriteUInt16(classStruct.MajorVersion, stream);
             
             // Write Constant Pool Count
-            ByteUtils.WriteUInt16(classStruct.ConstantPoolCount, stream);
+            // 修复：常量池计数应该是数组长度 + 1
+            ByteUtils.WriteUInt16((ushort)(classStruct.ConstantPool.Length + 1), stream);
             
             // Convert ConstantPoolInfoStruct To Objects List
             var constantPoolItems = new List<object>();
@@ -178,30 +182,29 @@ public static class ClassParser
     {
         return item switch
         {
-            ConstantClassInfoStruct classInfo => classInfo.ToBytes()[1..], // 去掉tag字节
-            ConstantFieldrefInfoStruct fieldrefInfo => fieldrefInfo.ToBytes()[1..],
-            ConstantMethodrefInfoStruct methodrefInfo => methodrefInfo.ToBytes()[1..],
-            ConstantInterfaceMethodrefInfoStruct interfaceMethodrefInfo => interfaceMethodrefInfo.ToBytes()[1..],
-            ConstantStringInfoStruct stringInfo => stringInfo.ToBytes()[1..],
-            ConstantIntegerInfoStruct integerInfo => integerInfo.ToBytes()[1..],
-            ConstantFloatInfoStruct floatInfo => floatInfo.ToBytes()[1..],
-            ConstantLongInfoStruct longInfo => longInfo.ToBytes()[1..],
-            ConstantDoubleInfoStruct doubleInfo => doubleInfo.ToBytes()[1..],
-            ConstantNameAndTypeInfoStruct nameAndTypeInfo => nameAndTypeInfo.ToBytes()[1..],
-            ConstantUtf8InfoStruct utf8Info => utf8Info.ToBytes()[1..],
-            ConstantMethodHandleInfoStruct methodHandleInfo => methodHandleInfo.ToBytes()[1..],
-            ConstantMethodTypeInfoStruct methodTypeInfo => methodTypeInfo.ToBytes()[1..],
-            ConstantDynamicInfoStruct dynamicInfo => dynamicInfo.ToBytes()[1..],
-            ConstantInvokeDynamicInfoStruct invokeDynamicInfo => invokeDynamicInfo.ToBytes()[1..],
-            ConstantModuleInfoStruct moduleInfo => moduleInfo.ToBytes()[1..],
-            ConstantPackageInfoStruct packageInfo => packageInfo.ToBytes()[1..],
+            ConstantClassInfoStruct classInfo => classInfo.ToBytesWithoutTag(),
+            ConstantFieldrefInfoStruct fieldrefInfo => fieldrefInfo.ToBytesWithoutTag(),
+            ConstantMethodrefInfoStruct methodrefInfo => methodrefInfo.ToBytesWithoutTag(),
+            ConstantInterfaceMethodrefInfoStruct interfaceMethodrefInfo => interfaceMethodrefInfo.ToBytesWithoutTag(),
+            ConstantStringInfoStruct stringInfo => stringInfo.ToBytesWithoutTag(),
+            ConstantIntegerInfoStruct integerInfo => integerInfo.ToBytesWithoutTag(),
+            ConstantFloatInfoStruct floatInfo => floatInfo.ToBytesWithoutTag(),
+            ConstantLongInfoStruct longInfo => longInfo.ToBytesWithoutTag(),
+            ConstantDoubleInfoStruct doubleInfo => doubleInfo.ToBytesWithoutTag(),
+            ConstantNameAndTypeInfoStruct nameAndTypeInfo => nameAndTypeInfo.ToBytesWithoutTag(),
+            ConstantUtf8InfoStruct utf8Info => utf8Info.ToBytesWithoutTag(),
+            ConstantMethodHandleInfoStruct methodHandleInfo => methodHandleInfo.ToBytesWithoutTag(),
+            ConstantMethodTypeInfoStruct methodTypeInfo => methodTypeInfo.ToBytesWithoutTag(),
+            ConstantDynamicInfoStruct dynamicInfo => dynamicInfo.ToBytesWithoutTag(),
+            ConstantInvokeDynamicInfoStruct invokeDynamicInfo => invokeDynamicInfo.ToBytesWithoutTag(),
+            ConstantModuleInfoStruct moduleInfo => moduleInfo.ToBytesWithoutTag(),
+            ConstantPackageInfoStruct packageInfo => packageInfo.ToBytesWithoutTag(),
             _ => throw new NotSupportedException($"Unknown constant pool item type: {item.GetType()}")
         };
     }
     
     private static object ConvertToConstantPoolItem(ConstantPoolInfoStruct cpInfo)
     {
-        // 修复：使用局部变量来处理偏移量
         int tempOffset = 0;
         
         switch ((ConstantPoolTag)cpInfo.Tag)
@@ -215,7 +218,7 @@ public static class ClassParser
             case ConstantPoolTag.Fieldref:
                 var fieldrefInfo = new ConstantFieldrefInfoStruct();
                 fieldrefInfo.Tag = cpInfo.Tag;
-                tempOffset = 0;
+                tempOffset = 0; // 修复：重置偏移量
                 fieldrefInfo.ClassIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 fieldrefInfo.NameAndTypeIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 return fieldrefInfo;
@@ -223,7 +226,7 @@ public static class ClassParser
             case ConstantPoolTag.Methodref:
                 var methodrefInfo = new ConstantMethodrefInfoStruct();
                 methodrefInfo.Tag = cpInfo.Tag;
-                tempOffset = 0;
+                tempOffset = 0; // 修复：重置偏移量
                 methodrefInfo.ClassIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 methodrefInfo.NameAndTypeIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 return methodrefInfo;
@@ -231,7 +234,7 @@ public static class ClassParser
             case ConstantPoolTag.InterfaceMethodref:
                 var interfaceMethodrefInfo = new ConstantInterfaceMethodrefInfoStruct();
                 interfaceMethodrefInfo.Tag = cpInfo.Tag;
-                tempOffset = 0;
+                tempOffset = 0; // 修复：重置偏移量
                 interfaceMethodrefInfo.ClassIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 interfaceMethodrefInfo.NameAndTypeIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 return interfaceMethodrefInfo;
@@ -239,25 +242,28 @@ public static class ClassParser
             case ConstantPoolTag.String:
                 var stringInfo = new ConstantStringInfoStruct();
                 stringInfo.Tag = cpInfo.Tag;
+                tempOffset = 0; // 修复：重置偏移量
                 stringInfo.NameIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 return stringInfo;
                 
             case ConstantPoolTag.Integer:
                 var integerInfo = new ConstantIntegerInfoStruct();
                 integerInfo.Tag = cpInfo.Tag;
-                integerInfo.Bytes = ByteUtils.ReadUInt32(cpInfo.Info, ref tempOffset);
+                tempOffset = 0; // 修复：重置偏移量
+                integerInfo.Bytes = BitConverter.ToUInt32(cpInfo.Info, tempOffset);
                 return integerInfo;
                 
             case ConstantPoolTag.Float:
                 var floatInfo = new ConstantFloatInfoStruct();
                 floatInfo.Tag = cpInfo.Tag;
-                floatInfo.Bytes = ByteUtils.ReadUInt32(cpInfo.Info, ref tempOffset);
+                tempOffset = 0; // 修复：重置偏移量
+                floatInfo.Bytes = BitConverter.ToUInt32(cpInfo.Info, tempOffset);
                 return floatInfo;
                 
             case ConstantPoolTag.Long:
                 var longInfo = new ConstantLongInfoStruct();
                 longInfo.Tag = cpInfo.Tag;
-                tempOffset = 0;
+                tempOffset = 0; // 修复：重置偏移量
                 longInfo.HighBytes = ByteUtils.ReadUInt32(cpInfo.Info, ref tempOffset);
                 longInfo.LowBytes = ByteUtils.ReadUInt32(cpInfo.Info, ref tempOffset);
                 return longInfo;
@@ -265,7 +271,7 @@ public static class ClassParser
             case ConstantPoolTag.Double:
                 var doubleInfo = new ConstantDoubleInfoStruct();
                 doubleInfo.Tag = cpInfo.Tag;
-                tempOffset = 0;
+                tempOffset = 0; // 修复：重置偏移量
                 doubleInfo.HighBytes = ByteUtils.ReadUInt32(cpInfo.Info, ref tempOffset);
                 doubleInfo.LowBytes = ByteUtils.ReadUInt32(cpInfo.Info, ref tempOffset);
                 return doubleInfo;
@@ -273,7 +279,7 @@ public static class ClassParser
             case ConstantPoolTag.NameAndType:
                 var nameAndTypeInfo = new ConstantNameAndTypeInfoStruct();
                 nameAndTypeInfo.Tag = cpInfo.Tag;
-                tempOffset = 0;
+                tempOffset = 0; // 修复：重置偏移量
                 nameAndTypeInfo.NameIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 nameAndTypeInfo.DescriptorIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 return nameAndTypeInfo;
@@ -281,7 +287,7 @@ public static class ClassParser
             case ConstantPoolTag.Utf8:
                 var utf8Info = new ConstantUtf8InfoStruct();
                 utf8Info.Tag = cpInfo.Tag;
-                tempOffset = 0;
+                tempOffset = 0; // 修复：重置偏移量
                 utf8Info.Length = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 utf8Info.Bytes = new byte[utf8Info.Length];
                 Array.Copy(cpInfo.Info, tempOffset, utf8Info.Bytes, 0, utf8Info.Length);
@@ -290,7 +296,7 @@ public static class ClassParser
             case ConstantPoolTag.MethodHandle:
                 var methodHandleInfo = new ConstantMethodHandleInfoStruct();
                 methodHandleInfo.Tag = cpInfo.Tag;
-                tempOffset = 0;
+                tempOffset = 0; // 修复：重置偏移量
                 methodHandleInfo.ReferenceKind = cpInfo.Info[tempOffset++];
                 methodHandleInfo.ReferenceIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 return methodHandleInfo;
@@ -298,13 +304,14 @@ public static class ClassParser
             case ConstantPoolTag.MethodType:
                 var methodTypeInfo = new ConstantMethodTypeInfoStruct();
                 methodTypeInfo.Tag = cpInfo.Tag;
+                tempOffset = 0; // 修复：重置偏移量
                 methodTypeInfo.DescriptorIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 return methodTypeInfo;
                 
             case ConstantPoolTag.Dynamic:
                 var dynamicInfo = new ConstantDynamicInfoStruct();
                 dynamicInfo.Tag = cpInfo.Tag;
-                tempOffset = 0;
+                tempOffset = 0; // 修复：重置偏移量
                 dynamicInfo.BootstrapMethodAttrIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 dynamicInfo.NameAndTypeIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 return dynamicInfo;
@@ -312,7 +319,7 @@ public static class ClassParser
             case ConstantPoolTag.InvokeDynamic:
                 var invokeDynamicInfo = new ConstantInvokeDynamicInfoStruct();
                 invokeDynamicInfo.Tag = cpInfo.Tag;
-                tempOffset = 0;
+                tempOffset = 0; // 修复：重置偏移量
                 invokeDynamicInfo.BootstrapMethodAttrIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 invokeDynamicInfo.NameAndTypeIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 return invokeDynamicInfo;
@@ -320,12 +327,14 @@ public static class ClassParser
             case ConstantPoolTag.Module:
                 var moduleInfo = new ConstantModuleInfoStruct();
                 moduleInfo.Tag = cpInfo.Tag;
+                tempOffset = 0; // 修复：重置偏移量
                 moduleInfo.NameIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 return moduleInfo;
                 
             case ConstantPoolTag.Package:
                 var packageInfo = new ConstantPackageInfoStruct();
                 packageInfo.Tag = cpInfo.Tag;
+                tempOffset = 0; // 修复：重置偏移量
                 packageInfo.NameIndex = ByteUtils.ReadUInt16(cpInfo.Info, ref tempOffset);
                 return packageInfo;
                 

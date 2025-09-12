@@ -55,6 +55,13 @@ public class ClassStruct
         var array = new List<ConstantPoolInfoStruct>(ConstantPool) { @struct };
         ConstantPool = array.ToArray();
         if (setCount) ConstantPoolCount++;
+        if (setCount)
+        {
+            if (@struct.Tag == (ushort)ConstantPoolTag.Long || @struct.Tag == (ushort)ConstantPoolTag.Double)
+            {
+                ConstantPoolCount++;
+            }
+        }
     }
 
     #endregion

@@ -96,23 +96,27 @@ public static class ClassParser
             ByteUtils.WriteUInt16(classStruct.MajorVersion, stream);
             
             // Calculate actual constant pool slot count including double-width entries
-            ushort slotCount = 0;
+            ushort constantPoolSlotCount = 0;
             foreach (var cpInfo in classStruct.ConstantPool)
             {
-                slotCount++;
+                constantPoolSlotCount++;
                 if (cpInfo.Tag == (byte)ConstantPoolTag.Long || cpInfo.Tag == (byte)ConstantPoolTag.Double)
                 {
-                    slotCount++; // Double-width entries take two slots
+                    constantPoolSlotCount++; // Double-width entries take two slots
                 }
             }
         
-            // Write Constant Pool Count (includes index 0)
-            ByteUtils.WriteUInt16((ushort)(slotCount + 1), stream);
+            // Write Constant Pool Count (number of slots + 1 for the zero index)
+            ByteUtils.WriteUInt16((ushort)(constantPoolSlotCount + 1), stream);
             
             // Convert ConstantPoolInfoStruct To Objects List
             var constantPoolItems = new List<object>();
             foreach (var cpInfo in classStruct.ConstantPool)
             {
+                if (cpInfo.Info == null)
+                {
+                    throw new ArgumentException("Constant pool item info is null");
+                }
                 constantPoolItems.Add(ConvertToConstantPoolItem(cpInfo));
             }
             

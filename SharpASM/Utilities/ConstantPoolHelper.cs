@@ -246,7 +246,52 @@ public class ConstantPoolHelper
         ConstantPool.Add(newConstant);
         return index;
     }
-
+    
+    public ushort NewString(string value)
+    {
+        var nameIndex = NewUtf8(value);
+    
+        ushort index = CalculateConstantPoolIndexCount();
+    
+        var newString = new ConstantStringInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.String,
+            NameIndex = nameIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newString.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+    
+    public ushort NewString(ushort nameIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.String)
+            {
+                var cpi = (ConstantStringInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.NameIndex == nameIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        var newString = new ConstantStringInfoStruct()
+        {
+            Tag = (byte) ConstantPoolTag.String,
+            NameIndex = nameIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newString.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
     
     
     // TODO...

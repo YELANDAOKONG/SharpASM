@@ -81,8 +81,6 @@ public class ConstantPoolHelper
     
     public ushort NewInteger(int value)
     {
-        
-        
         ushort index = 1;
         foreach (var c in ConstantPool)
         {
@@ -107,6 +105,68 @@ public class ConstantPoolHelper
         };
         newInt.SetValue(value);
         var newConstant = ConstantPoolInfo.FromStruct(newInt.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+    
+    public ushort NewFloat(float value)
+    {
+        var newFloat = new ConstantFloatInfoStruct()
+        {
+            Tag = (byte) ConstantPoolTag.Float,
+        };
+        newFloat.SetValue(value);
+        
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Float)
+            {
+                var cpi = (ConstantFloatInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.Bytes == newFloat.Bytes)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        var newConstant = ConstantPoolInfo.FromStruct(newFloat.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+    
+    public ushort NewLong(long value)
+    {
+        var newLong = new ConstantLongInfoStruct()
+        {
+            Tag = (byte) ConstantPoolTag.Long,
+        };
+        newLong.SetValue(value);
+        
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Long)
+            {
+                var cpi = (ConstantLongInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.LowBytes == newLong.LowBytes && cpi.HighBytes == newLong.HighBytes)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        var newConstant = ConstantPoolInfo.FromStruct(newLong.ToStructInfo());
         ConstantPool.Add(newConstant);
         return index;
     }

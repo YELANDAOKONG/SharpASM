@@ -142,11 +142,6 @@ public class ConstantPoolHelper
     
     public ushort NewLong(long value)
     {
-        var newLong = new ConstantLongInfoStruct()
-        {
-            Tag = (byte) ConstantPoolTag.Long,
-        };
-        newLong.SetValue(value);
         
         ushort index = 1;
         foreach (var c in ConstantPool)
@@ -154,7 +149,7 @@ public class ConstantPoolHelper
             if (c.Tag == ConstantPoolTag.Long)
             {
                 var cpi = (ConstantLongInfoStruct)(c.ToStruct().ToConstantStruct());
-                if (cpi.LowBytes == newLong.LowBytes && cpi.HighBytes == newLong.HighBytes)
+                if (cpi.GetValue() == value)
                 {
                     return index;
                 }
@@ -166,10 +161,48 @@ public class ConstantPoolHelper
             }
         }
         
+        var newLong = new ConstantLongInfoStruct()
+        {
+            Tag = (byte) ConstantPoolTag.Long,
+        };
+        newLong.SetValue(value);
         var newConstant = ConstantPoolInfo.FromStruct(newLong.ToStructInfo());
         ConstantPool.Add(newConstant);
         return index;
     }
+    
+    public ushort NewDouble(double value)
+    {
+        var newDouble = new ConstantDoubleInfoStruct()
+        {
+            Tag = (byte) ConstantPoolTag.Double,
+        };
+        newDouble.SetValue(value);
+        
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Double)
+            {
+                var cpi = (ConstantDoubleInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.LowBytes == newDouble.LowBytes && cpi.HighBytes == newDouble.HighBytes)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        var newConstant = ConstantPoolInfo.FromStruct(newDouble.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+    
+    
     
     
     // TODO...

@@ -446,4 +446,15 @@ public class ConstantPoolHelper
     #endregion
 
 
+    public ConstantPoolInfoStruct[] ToArray()
+    {
+        var array = new List<ConstantPoolInfoStruct>();
+        foreach (var c in ConstantPool)
+        {
+            array.Add(c.ToStruct());
+        }
+
+        return array.ToArray();
+    }
+
 }

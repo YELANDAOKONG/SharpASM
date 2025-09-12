@@ -391,12 +391,59 @@ public class ConstantPoolHelper
         return index;
     }
 
+    public ushort NewInterfaceMethodref(string className, string fieldName, string fieldDescriptor)
+    {
+        ushort classIndex = NewClass(className);
+        ushort nameAndTypeIndex = NewNameAndType(fieldName, fieldDescriptor);
     
+        ushort index = CalculateConstantPoolIndexCount();
+    
+        var newInterfaceMethodref = new ConstantInterfaceMethodrefInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.InterfaceMethodref,
+            ClassIndex = classIndex,
+            NameAndTypeIndex = nameAndTypeIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newInterfaceMethodref.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
 
+    public ushort NewInterfaceMethodref(ushort classIndex, ushort nameAndTypeIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.InterfaceMethodref)
+            {
+                var cpi = (ConstantInterfaceMethodrefInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.ClassIndex == classIndex && cpi.NameAndTypeIndex == nameAndTypeIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
     
+        var newInterfaceMethodref = new ConstantInterfaceMethodrefInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.InterfaceMethodref,
+            ClassIndex = classIndex,
+            NameAndTypeIndex = nameAndTypeIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newInterfaceMethodref.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+
     // TODO...
-    
+
     #endregion
-    
-    
+
+
 }

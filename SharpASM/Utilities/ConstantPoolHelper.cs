@@ -79,6 +79,41 @@ public class ConstantPoolHelper
         return index;
     }
     
+    public ushort NewInteger(int value)
+    {
+        
+        
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Integer)
+            {
+                var cpi = (ConstantIntegerInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.GetValue() == value)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        var newInt = new ConstantIntegerInfoStruct()
+        {
+            Tag = (byte) ConstantPoolTag.Integer,
+        };
+        newInt.SetValue(value);
+        var newConstant = ConstantPoolInfo.FromStruct(newInt.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+    
+    
+    // TODO...
+    
     #endregion
     
     

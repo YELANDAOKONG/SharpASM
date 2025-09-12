@@ -1,8 +1,9 @@
+using SharpASM.Models.Struct.Interfaces;
 using SharpASM.Utilities;
 
 namespace SharpASM.Models.Struct.Attribute;
 
-public class ConstantValueAttributeStruct : AttributeInfoStruct
+public class ConstantValueAttributeStruct : IAttributeStruct
 {
     /*
      * ConstantValue_attribute {
@@ -12,27 +13,32 @@ public class ConstantValueAttributeStruct : AttributeInfoStruct
        }
      */
     
-    // public ushort AttributeNameIndex { get; set; }
-    // public uint AttributeLength { get; set; }
+    public ushort AttributeNameIndex { get; set; }
+    public uint AttributeLength { get; set; }
     public ushort ConstantValueIndex { get; set; }
     
-    public static new ConstantValueAttributeStruct FromBytes(byte[] data, ref int offset)
+    public byte[] ToBytes()
     {
-        var attribute = new ConstantValueAttributeStruct();
-        attribute.AttributeNameIndex = ByteUtils.ReadUInt16(data, ref offset);
-        attribute.AttributeLength = ByteUtils.ReadUInt32(data, ref offset);
-        attribute.ConstantValueIndex = ByteUtils.ReadUInt16(data, ref offset);
-        return attribute;
+        return ToStructInfo().ToBytes();
     }
     
-    public override byte[] ToBytes()
+    public byte[] ToBytesWithoutIndexAndLength()
     {
         using (var stream = new MemoryStream())
         {
-            ByteUtils.WriteUInt16(AttributeNameIndex, stream);
-            ByteUtils.WriteUInt32(AttributeLength, stream);
             ByteUtils.WriteUInt16(ConstantValueIndex, stream);
             return stream.ToArray();
         }
+    }
+    
+    public AttributeInfoStruct ToStructInfo()
+    {
+        var infoBytes = ToBytesWithoutIndexAndLength();
+        return new AttributeInfoStruct
+        {
+            AttributeNameIndex = AttributeNameIndex,
+            AttributeLength = (uint)infoBytes.Length,
+            Info = infoBytes
+        };
     }
 }

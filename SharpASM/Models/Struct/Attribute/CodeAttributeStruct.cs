@@ -2,7 +2,7 @@ using SharpASM.Models.Struct.Interfaces;
 using SharpASM.Parsers;
 using SharpASM.Utilities;
 
-namespace SharpASM.Models.Struct;
+namespace SharpASM.Models.Struct.Attribute;
 
 public class CodeAttributeStruct : IAttributeStruct
 {

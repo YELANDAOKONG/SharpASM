@@ -1,5 +1,6 @@
 using SharpASM.Models.Struct;
 using SharpASM.Models.Type;
+using SharpASM.Utilities;
 
 namespace SharpASM.Models;
 
@@ -16,8 +17,8 @@ public class Class
     
     public ClassAccessFlags AccessFlags { get; set; }
     
-    public ushort ThisClass { get; set; }
-    public ushort SuperClass { get; set; }
+    public string ThisClass { get; set; } = string.Empty;
+    public string SuperClass { get; set; } = "java/lang/Object";
     
     public ushort InterfacesCount => (ushort)Interfaces.Count;
     public List<string> Interfaces { get; set; } = new();
@@ -51,4 +52,14 @@ public class Class
         
         return count;
     }
+
+    #region Functions
+
+    public ConstantPoolHelper GetConstantPoolHelper()
+    {
+        return new ConstantPoolHelper(ConstantPool);
+    }
+
+    #endregion
+    
 }

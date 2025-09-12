@@ -490,7 +490,243 @@ public class ConstantPoolHelper
     }
 
 
-    // TODO...
+    // ========= AI-Generated Code - Start =========
+
+    public ushort NewMethodHandle(byte referenceKind, ushort referenceIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.MethodHandle)
+            {
+                var cpi = (ConstantMethodHandleInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.ReferenceKind == referenceKind && cpi.ReferenceIndex == referenceIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        var newMethodHandle = new ConstantMethodHandleInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.MethodHandle,
+            ReferenceKind = referenceKind,
+            ReferenceIndex = referenceIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newMethodHandle.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+    public ushort NewMethodType(string descriptor)
+    {
+        ushort descriptorIndex = NewUtf8(descriptor);
+        
+        ushort index = CalculateConstantPoolIndexCount();
+        
+        var newMethodType = new ConstantMethodTypeInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.MethodType,
+            DescriptorIndex = descriptorIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newMethodType.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+    public ushort NewMethodType(ushort descriptorIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.MethodType)
+            {
+                var cpi = (ConstantMethodTypeInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.DescriptorIndex == descriptorIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        var newMethodType = new ConstantMethodTypeInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.MethodType,
+            DescriptorIndex = descriptorIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newMethodType.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+    public ushort NewDynamic(ushort bootstrapMethodAttrIndex, ushort nameAndTypeIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Dynamic)
+            {
+                var cpi = (ConstantDynamicInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.BootstrapMethodAttrIndex == bootstrapMethodAttrIndex && 
+                    cpi.NameAndTypeIndex == nameAndTypeIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        var newDynamic = new ConstantDynamicInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.Dynamic,
+            BootstrapMethodAttrIndex = bootstrapMethodAttrIndex,
+            NameAndTypeIndex = nameAndTypeIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newDynamic.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+    public ushort NewInvokeDynamic(ushort bootstrapMethodAttrIndex, ushort nameAndTypeIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.InvokeDynamic)
+            {
+                var cpi = (ConstantInvokeDynamicInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.BootstrapMethodAttrIndex == bootstrapMethodAttrIndex && 
+                    cpi.NameAndTypeIndex == nameAndTypeIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        var newInvokeDynamic = new ConstantInvokeDynamicInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.InvokeDynamic,
+            BootstrapMethodAttrIndex = bootstrapMethodAttrIndex,
+            NameAndTypeIndex = nameAndTypeIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newInvokeDynamic.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+    public ushort NewModule(string name)
+    {
+        ushort nameIndex = NewUtf8(name);
+        
+        ushort index = CalculateConstantPoolIndexCount();
+        
+        var newModule = new ConstantModuleInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.Module,
+            NameIndex = nameIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newModule.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+    public ushort NewModule(ushort nameIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Module)
+            {
+                var cpi = (ConstantModuleInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.NameIndex == nameIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        var newModule = new ConstantModuleInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.Module,
+            NameIndex = nameIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newModule.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+    public ushort NewPackage(string name)
+    {
+        ushort nameIndex = NewUtf8(name);
+        
+        ushort index = CalculateConstantPoolIndexCount();
+        
+        var newPackage = new ConstantPackageInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.Package,
+            NameIndex = nameIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newPackage.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+    public ushort NewPackage(ushort nameIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Package)
+            {
+                var cpi = (ConstantPackageInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.NameIndex == nameIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        var newPackage = new ConstantPackageInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.Package,
+            NameIndex = nameIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newPackage.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+    
+    // ========= AI-Generated Code - End =========
+    
 
     #endregion
 

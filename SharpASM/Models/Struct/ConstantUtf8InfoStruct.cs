@@ -34,6 +34,8 @@ public class ConstantUtf8InfoStruct : IConstantStruct
         info.Bytes = ByteUtils.ReadBytes(data, ref offset, info.Length);
         return info;
     }
+    
+    public byte GetTag() => Tag;
         
     public byte[] ToBytes()
     {

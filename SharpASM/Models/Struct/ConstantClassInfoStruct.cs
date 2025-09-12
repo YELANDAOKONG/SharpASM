@@ -30,6 +30,8 @@ public class ConstantClassInfoStruct : IConstantStruct
         info.NameIndex = ByteUtils.ReadUInt16(data, ref offset);
         return info;
     }
+
+    public byte GetTag() => Tag;
     
     public byte[] ToBytes()
     {

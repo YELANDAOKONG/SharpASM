@@ -34,6 +34,8 @@ public class ConstantLongInfoStruct : IConstantStruct
         info.LowBytes = ByteUtils.ReadUInt32(data, ref offset);
         return info;
     }
+    
+    public byte GetTag() => Tag;
         
     public byte[] ToBytes()
     {

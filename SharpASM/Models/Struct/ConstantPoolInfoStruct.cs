@@ -1,6 +1,8 @@
+using SharpASM.Models.Struct.Interfaces;
+
 namespace SharpASM.Models.Struct;
 
-public class ConstantPoolInfoStruct
+public class ConstantPoolInfoStruct // : IConstantStruct
 {
     /*
      * cp_info {
@@ -11,4 +13,6 @@ public class ConstantPoolInfoStruct
     
     public byte Tag { get; set; }
     public byte[] Info { get; set; } = [];
+    
+    public byte GetTag() => Tag;
 }

@@ -35,6 +35,8 @@ public class ConstantInvokeDynamicInfoStruct : IConstantStruct
         return info;
     }
     
+    public byte GetTag() => Tag;
+    
     public byte[] ToBytes()
     {
         using var stream = new MemoryStream();

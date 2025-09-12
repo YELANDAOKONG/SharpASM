@@ -34,6 +34,8 @@ public class ConstantDynamicInfoStruct : IConstantStruct
         info.NameAndTypeIndex = ByteUtils.ReadUInt16(data, ref offset);
         return info;
     }
+    
+    public byte GetTag() => Tag;
         
     public byte[] ToBytes()
     {

@@ -30,6 +30,8 @@ public class ConstantFloatInfoStruct : IConstantStruct
         info.Bytes = ByteUtils.ReadUInt32(data, ref offset);
         return info;
     }
+    
+    public byte GetTag() => Tag;
         
     public byte[] ToBytes()
     {

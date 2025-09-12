@@ -142,7 +142,6 @@ public class ConstantPoolHelper
     
     public ushort NewLong(long value)
     {
-        
         ushort index = 1;
         foreach (var c in ConstantPool)
         {
@@ -202,7 +201,52 @@ public class ConstantPoolHelper
         return index;
     }
     
+    public ushort NewClass(string value)
+    {
+        var classNameIndex = NewUtf8(value);
     
+        ushort index = CalculateConstantPoolIndexCount();
+    
+        var newClass = new ConstantClassInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.Class,
+            NameIndex = classNameIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newClass.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+    
+    public ushort NewClass(ushort nameIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Class)
+            {
+                var cpi = (ConstantClassInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.NameIndex == nameIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        var newClass = new ConstantClassInfoStruct()
+        {
+            Tag = (byte) ConstantPoolTag.Class,
+            NameIndex = nameIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newClass.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
     
     
     // TODO...

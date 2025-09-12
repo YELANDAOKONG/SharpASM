@@ -2,5 +2,8 @@ namespace SharpASM.Models.Struct.Interfaces;
 
 public interface IAttributeStruct
 {
-    // TODO...
+    public byte[] ToBytes();
+    public byte[] ToBytesWithoutIndexAndLength();
+    
+     public AttributeInfoStruct ToStructInfo();
 }

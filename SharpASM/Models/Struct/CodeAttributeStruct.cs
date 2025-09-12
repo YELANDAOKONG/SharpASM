@@ -41,5 +41,22 @@ public class CodeAttributeStruct : IAttributeStruct
     public ExceptionTableStruct[] ExceptionTable { get; set; } = [];
     public ushort AttributesCount { get; set; }
     public AttributeInfoStruct[] Attributes { get; set; } = [];
+
     
+    // TODO...
+    
+    public byte[] ToBytes()
+    {
+        throw new NotImplementedException();
+    }
+
+    public byte[] ToBytesWithoutIndexAndLength()
+    {
+        throw new NotImplementedException();
+    }
+
+    public AttributeInfoStruct ToStructInfo()
+    {
+        throw new NotImplementedException();
+    }
 }

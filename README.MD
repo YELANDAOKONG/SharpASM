@@ -122,7 +122,7 @@ var clazz = ClassParser.Parse(classData);
 Console.WriteLine(clazz);
 ```
 
-```json
+```text
 @Class {
     Magic: 0xCAFEBABE,
     MinorVersion: 0,

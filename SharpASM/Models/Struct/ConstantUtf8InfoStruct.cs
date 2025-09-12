@@ -1,9 +1,10 @@
+using SharpASM.Models.Struct.Interfaces;
 using SharpASM.Models.Type;
 using SharpASM.Utilities;
 
 namespace SharpASM.Models.Struct;
 
-public class ConstantUtf8InfoStruct
+public class ConstantUtf8InfoStruct : IConstantStruct
 {
     /*
      * CONSTANT_Utf8_info {
@@ -43,6 +44,14 @@ public class ConstantUtf8InfoStruct
             stream.Write(Bytes, 0, Bytes.Length);
             return stream.ToArray();
         }
+    }
+
+    public byte[] ToBytesWithoutTag()
+    {
+        using var stream = new MemoryStream();
+        ByteUtils.WriteUInt16(Length, stream);
+        stream.Write(Bytes, 0, Bytes.Length);
+        return stream.ToArray();
     }
     
     public static ConstantUtf8InfoStruct FromString(string text)

@@ -1,9 +1,10 @@
+using SharpASM.Models.Struct.Interfaces;
 using SharpASM.Models.Type;
 using SharpASM.Utilities;
 
 namespace SharpASM.Models.Struct;
 
-public class ConstantModuleInfoStruct
+public class ConstantModuleInfoStruct : IConstantStruct
 {
     /*
      * CONSTANT_Module_info {
@@ -32,11 +33,16 @@ public class ConstantModuleInfoStruct
         
     public byte[] ToBytes()
     {
-        using (var stream = new MemoryStream())
-        {
-            stream.WriteByte(Tag);
-            ByteUtils.WriteUInt16(NameIndex, stream);
-            return stream.ToArray();
-        }
+        using var stream = new MemoryStream();
+        stream.WriteByte(Tag);
+        ByteUtils.WriteUInt16(NameIndex, stream);
+        return stream.ToArray();
+    }
+
+    public byte[] ToBytesWithoutTag()
+    {
+        using var stream = new MemoryStream();
+        ByteUtils.WriteUInt16(NameIndex, stream);
+        return stream.ToArray();
     }
 }

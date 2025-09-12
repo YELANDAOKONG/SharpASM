@@ -1,9 +1,10 @@
+using SharpASM.Models.Struct.Interfaces;
 using SharpASM.Models.Type;
 using SharpASM.Utilities;
 
 namespace SharpASM.Models.Struct;
 
-public class ConstantInterfaceMethodrefInfoStruct
+public class ConstantInterfaceMethodrefInfoStruct : IConstantStruct
 {
     /*
      * CONSTANT_InterfaceMethodref_info {
@@ -36,12 +37,18 @@ public class ConstantInterfaceMethodrefInfoStruct
         
     public byte[] ToBytes()
     {
-        using (var stream = new MemoryStream())
-        {
-            stream.WriteByte(Tag);
-            ByteUtils.WriteUInt16(ClassIndex, stream);
-            ByteUtils.WriteUInt16(NameAndTypeIndex, stream);
-            return stream.ToArray();
-        }
+        using var stream = new MemoryStream();
+        stream.WriteByte(Tag);
+        ByteUtils.WriteUInt16(ClassIndex, stream);
+        ByteUtils.WriteUInt16(NameAndTypeIndex, stream);
+        return stream.ToArray();
+    }
+
+    public byte[] ToBytesWithoutTag()
+    {
+        using var stream = new MemoryStream();
+        ByteUtils.WriteUInt16(ClassIndex, stream);
+        ByteUtils.WriteUInt16(NameAndTypeIndex, stream);
+        return stream.ToArray();
     }
 }

@@ -1,9 +1,10 @@
+using SharpASM.Models.Struct.Interfaces;
 using SharpASM.Models.Type;
 using SharpASM.Utilities;
 
 namespace SharpASM.Models.Struct;
 
-public class ConstantDoubleInfoStruct
+public class ConstantDoubleInfoStruct : IConstantStruct
 {
     /*
      * CONSTANT_Double_info {
@@ -36,15 +37,21 @@ public class ConstantDoubleInfoStruct
         
     public byte[] ToBytes()
     {
-        using (var stream = new MemoryStream())
-        {
-            stream.WriteByte(Tag);
-            ByteUtils.WriteUInt32(HighBytes, stream);
-            ByteUtils.WriteUInt32(LowBytes, stream);
-            return stream.ToArray();
-        }
+        using var stream = new MemoryStream();
+        stream.WriteByte(Tag);
+        ByteUtils.WriteUInt32(HighBytes, stream);
+        ByteUtils.WriteUInt32(LowBytes, stream);
+        return stream.ToArray();
     }
-        
+
+    public byte[] ToBytesWithoutTag()
+    {
+        using var stream = new MemoryStream();
+        ByteUtils.WriteUInt32(HighBytes, stream);
+        ByteUtils.WriteUInt32(LowBytes, stream);
+        return stream.ToArray();
+    }
+
     public double GetValue()
     {
         long longValue = ((long)HighBytes << 32) | LowBytes;

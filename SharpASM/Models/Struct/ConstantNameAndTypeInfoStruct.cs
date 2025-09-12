@@ -1,9 +1,10 @@
+using SharpASM.Models.Struct.Interfaces;
 using SharpASM.Models.Type;
 using SharpASM.Utilities;
 
 namespace SharpASM.Models.Struct;
 
-public class ConstantNameAndTypeInfoStruct
+public class ConstantNameAndTypeInfoStruct : IConstantStruct
 {
     /*
      * CONSTANT_NameAndType_info {
@@ -36,12 +37,18 @@ public class ConstantNameAndTypeInfoStruct
     
     public byte[] ToBytes()
     {
-        using (var stream = new MemoryStream())
-        {
-            stream.WriteByte(Tag);
-            ByteUtils.WriteUInt16(NameIndex, stream);
-            ByteUtils.WriteUInt16(DescriptorIndex, stream);
-            return stream.ToArray();
-        }
+        using var stream = new MemoryStream();
+        stream.WriteByte(Tag);
+        ByteUtils.WriteUInt16(NameIndex, stream);
+        ByteUtils.WriteUInt16(DescriptorIndex, stream);
+        return stream.ToArray();
+    }
+
+    public byte[] ToBytesWithoutTag()
+    {
+        using var stream = new MemoryStream();
+        ByteUtils.WriteUInt16(NameIndex, stream);
+        ByteUtils.WriteUInt16(DescriptorIndex, stream);
+        return stream.ToArray();
     }
 }

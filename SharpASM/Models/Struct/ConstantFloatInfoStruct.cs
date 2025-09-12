@@ -1,9 +1,10 @@
+using SharpASM.Models.Struct.Interfaces;
 using SharpASM.Models.Type;
 using SharpASM.Utilities;
 
 namespace SharpASM.Models.Struct;
 
-public class ConstantFloatInfoStruct
+public class ConstantFloatInfoStruct : IConstantStruct
 {
     /*
      * CONSTANT_Float_info {
@@ -32,14 +33,19 @@ public class ConstantFloatInfoStruct
         
     public byte[] ToBytes()
     {
-        using (var stream = new MemoryStream())
-        {
-            stream.WriteByte(Tag);
-            ByteUtils.WriteUInt32(Bytes, stream);
-            return stream.ToArray();
-        }
+        using var stream = new MemoryStream();
+        stream.WriteByte(Tag);
+        ByteUtils.WriteUInt32(Bytes, stream);
+        return stream.ToArray();
     }
-        
+
+    public byte[] ToBytesWithoutTag()
+    {
+        using var stream = new MemoryStream();
+        ByteUtils.WriteUInt32(Bytes, stream);
+        return stream.ToArray();
+    }
+
     public float GetValue()
     {
         // Extract the big-endian bytes from the stored integer value

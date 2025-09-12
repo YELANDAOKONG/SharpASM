@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace SharpASM.Models.Code;
 
 public class Code
@@ -16,6 +18,26 @@ public class Code
         : this(opCode, operands)
     {
         Prefix = prefix;
+    }
+
+    public override string ToString()
+    {
+        var operands = new StringBuilder();
+        foreach (var operand in Operands)
+        {
+            operands.Append($"0x{operand.ToString()}");
+            operands.Append(", ");
+        }
+        var data = operands.ToString();
+        data = data.Trim(' ');
+        data = data.TrimEnd(',');
+        
+        if (Prefix != null)
+        {
+            return $"({Prefix.ToString()}) {OpCode.ToString()} [{data}]";
+        }
+
+        return $"{OpCode.ToString()} [{data}]";
     }
 
     #region Functions (Code)

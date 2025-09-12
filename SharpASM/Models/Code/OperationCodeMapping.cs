@@ -195,6 +195,13 @@ public static class OperationCodeMapping
             [OperationCode.GOTO_W] = (1, new[] { 4 }),        // branchoffset (wide)
             [OperationCode.JSR_W] = (1, new[] { 4 }),         // branchoffset (wide)
 
+            [OperationCode.IRETURN] = (0, Array.Empty<int>()),
+            [OperationCode.LRETURN] = (0, Array.Empty<int>()),
+            [OperationCode.FRETURN] = (0, Array.Empty<int>()),
+            [OperationCode.DRETURN] = (0, Array.Empty<int>()),
+            [OperationCode.ARETURN] = (0, Array.Empty<int>()),
+            [OperationCode.RETURN] = (0, Array.Empty<int>()),
+
             // References
             [OperationCode.GETSTATIC] = (1, new[] { 2 }),     // index
             [OperationCode.PUTSTATIC] = (1, new[] { 2 }),     // index

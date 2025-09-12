@@ -30,8 +30,7 @@ public static class ClassParser
         classStruct.ConstantPoolCount = ByteUtils.ReadUInt16(data, ref offset);
         var constantPool = ConstantPoolParser.ParseConstantPool(data, ref offset, classStruct.ConstantPoolCount);
         
-        // 修复：常量池数组大小应该是 ConstantPoolCount - 1
-        classStruct.ConstantPool = new ConstantPoolInfoStruct[classStruct.ConstantPoolCount - 1];
+        classStruct.ConstantPool = new ConstantPoolInfoStruct[constantPool.Count];
         
         for (int i = 0; i < constantPool.Count; i++)
         {
@@ -39,7 +38,7 @@ public static class ClassParser
             classStruct.ConstantPool[i] = new ConstantPoolInfoStruct
             {
                 Tag = GetTagFromConstantPoolItem(item),
-                Info = GetInfoFromConstantPoolItem(item)
+                Info = GetInfoFromConstantPoolItem(item) ?? []
             };
         }
         
@@ -96,9 +95,19 @@ public static class ClassParser
             ByteUtils.WriteUInt16(classStruct.MinorVersion, stream);
             ByteUtils.WriteUInt16(classStruct.MajorVersion, stream);
             
-            // Write Constant Pool Count
-            // 修复：常量池计数应该是数组长度 + 1
-            ByteUtils.WriteUInt16((ushort)(classStruct.ConstantPool.Length + 1), stream);
+            // Calculate actual constant pool slot count including double-width entries
+            ushort slotCount = 0;
+            foreach (var cpInfo in classStruct.ConstantPool)
+            {
+                slotCount++;
+                if (cpInfo.Tag == (byte)ConstantPoolTag.Long || cpInfo.Tag == (byte)ConstantPoolTag.Double)
+                {
+                    slotCount++; // Double-width entries take two slots
+                }
+            }
+        
+            // Write Constant Pool Count (includes index 0)
+            ByteUtils.WriteUInt16((ushort)(slotCount + 1), stream);
             
             // Convert ConstantPoolInfoStruct To Objects List
             var constantPoolItems = new List<object>();
@@ -180,31 +189,44 @@ public static class ClassParser
     
     private static byte[] GetInfoFromConstantPoolItem(object item)
     {
-        return item switch
+        try
         {
-            ConstantClassInfoStruct classInfo => classInfo.ToBytesWithoutTag(),
-            ConstantFieldrefInfoStruct fieldrefInfo => fieldrefInfo.ToBytesWithoutTag(),
-            ConstantMethodrefInfoStruct methodrefInfo => methodrefInfo.ToBytesWithoutTag(),
-            ConstantInterfaceMethodrefInfoStruct interfaceMethodrefInfo => interfaceMethodrefInfo.ToBytesWithoutTag(),
-            ConstantStringInfoStruct stringInfo => stringInfo.ToBytesWithoutTag(),
-            ConstantIntegerInfoStruct integerInfo => integerInfo.ToBytesWithoutTag(),
-            ConstantFloatInfoStruct floatInfo => floatInfo.ToBytesWithoutTag(),
-            ConstantLongInfoStruct longInfo => longInfo.ToBytesWithoutTag(),
-            ConstantDoubleInfoStruct doubleInfo => doubleInfo.ToBytesWithoutTag(),
-            ConstantNameAndTypeInfoStruct nameAndTypeInfo => nameAndTypeInfo.ToBytesWithoutTag(),
-            ConstantUtf8InfoStruct utf8Info => utf8Info.ToBytesWithoutTag(),
-            ConstantMethodHandleInfoStruct methodHandleInfo => methodHandleInfo.ToBytesWithoutTag(),
-            ConstantMethodTypeInfoStruct methodTypeInfo => methodTypeInfo.ToBytesWithoutTag(),
-            ConstantDynamicInfoStruct dynamicInfo => dynamicInfo.ToBytesWithoutTag(),
-            ConstantInvokeDynamicInfoStruct invokeDynamicInfo => invokeDynamicInfo.ToBytesWithoutTag(),
-            ConstantModuleInfoStruct moduleInfo => moduleInfo.ToBytesWithoutTag(),
-            ConstantPackageInfoStruct packageInfo => packageInfo.ToBytesWithoutTag(),
-            _ => throw new NotSupportedException($"Unknown constant pool item type: {item.GetType()}")
-        };
+            return item switch
+            {
+                ConstantClassInfoStruct classInfo => classInfo.ToBytesWithoutTag(),
+                ConstantFieldrefInfoStruct fieldrefInfo => fieldrefInfo.ToBytesWithoutTag(),
+                ConstantMethodrefInfoStruct methodrefInfo => methodrefInfo.ToBytesWithoutTag(),
+                ConstantInterfaceMethodrefInfoStruct interfaceMethodrefInfo =>
+                    interfaceMethodrefInfo.ToBytesWithoutTag(),
+                ConstantStringInfoStruct stringInfo => stringInfo.ToBytesWithoutTag(),
+                ConstantIntegerInfoStruct integerInfo => integerInfo.ToBytesWithoutTag(),
+                ConstantFloatInfoStruct floatInfo => floatInfo.ToBytesWithoutTag(),
+                ConstantLongInfoStruct longInfo => longInfo.ToBytesWithoutTag(),
+                ConstantDoubleInfoStruct doubleInfo => doubleInfo.ToBytesWithoutTag(),
+                ConstantNameAndTypeInfoStruct nameAndTypeInfo => nameAndTypeInfo.ToBytesWithoutTag(),
+                ConstantUtf8InfoStruct utf8Info => utf8Info.ToBytesWithoutTag(),
+                ConstantMethodHandleInfoStruct methodHandleInfo => methodHandleInfo.ToBytesWithoutTag(),
+                ConstantMethodTypeInfoStruct methodTypeInfo => methodTypeInfo.ToBytesWithoutTag(),
+                ConstantDynamicInfoStruct dynamicInfo => dynamicInfo.ToBytesWithoutTag(),
+                ConstantInvokeDynamicInfoStruct invokeDynamicInfo => invokeDynamicInfo.ToBytesWithoutTag(),
+                ConstantModuleInfoStruct moduleInfo => moduleInfo.ToBytesWithoutTag(),
+                ConstantPackageInfoStruct packageInfo => packageInfo.ToBytesWithoutTag(),
+                _ => throw new NotSupportedException($"Unknown constant pool item type: {item.GetType()}")
+            };
+        }
+        catch
+        {
+            return Array.Empty<byte>();
+        }
     }
     
     private static object ConvertToConstantPoolItem(ConstantPoolInfoStruct cpInfo)
     {
+        if (cpInfo.Info == null)
+        {
+            throw new ArgumentException("Constant pool item info is null");
+        }
+        
         int tempOffset = 0;
         
         switch ((ConstantPoolTag)cpInfo.Tag)

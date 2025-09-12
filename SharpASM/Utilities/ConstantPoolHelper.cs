@@ -439,6 +439,55 @@ public class ConstantPoolHelper
         ConstantPool.Add(newConstant);
         return index;
     }
+    
+    public ushort NewNameAndType(string name, string descriptor)
+    {
+        ushort nameIndex = NewUtf8(name);
+        ushort descriptorIndex = NewUtf8(descriptor);
+    
+        ushort index = CalculateConstantPoolIndexCount();
+    
+        var newNameAndType = new ConstantNameAndTypeInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.NameAndType,
+            NameIndex = nameIndex,
+            DescriptorIndex = descriptorIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newNameAndType.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
+
+    public ushort NewNameAndType(ushort nameIndex, ushort descriptorIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.NameAndType)
+            {
+                var cpi = (ConstantNameAndTypeInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.NameIndex == nameIndex && cpi.DescriptorIndex == descriptorIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+    
+        var newNameAndType = new ConstantNameAndTypeInfoStruct()
+        {
+            Tag = (byte)ConstantPoolTag.NameAndType,
+            NameIndex = nameIndex,
+            DescriptorIndex = descriptorIndex,
+        };
+        var newConstant = ConstantPoolInfo.FromStruct(newNameAndType.ToStructInfo());
+        ConstantPool.Add(newConstant);
+        return index;
+    }
 
 
     // TODO...

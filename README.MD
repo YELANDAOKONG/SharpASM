@@ -47,25 +47,25 @@ var mainMethod = new Method
 // 构建字节码
 var codeBytes = new List<byte>();
 // getstatic System.out
-codeBytes.Add(0xB2);
+codeBytes.Add((byte)OperationCode.GETSTATIC);
 codeBytes.AddRange(BitConverter.GetBytes(systemOutFieldRefIndex).Reverse().Take(2));
 // ldc "Hello, World! "
-codeBytes.Add(0x12);
+codeBytes.Add((byte)OperationCode.LDC);
 codeBytes.Add((byte)helloWorldStrIndex);
 // invokevirtual PrintStream.println
-codeBytes.Add(0xB6);
+codeBytes.Add((byte)OperationCode.INVOKEVIRTUAL);
 codeBytes.AddRange(BitConverter.GetBytes(printlnMethodRefIndex).Reverse().Take(2));
 // getstatic System.out
-codeBytes.Add(0xB2);
+codeBytes.Add((byte)OperationCode.GETSTATIC);
 codeBytes.AddRange(BitConverter.GetBytes(systemOutFieldRefIndex).Reverse().Take(2));
 // ldc "Hello, C#! "
-codeBytes.Add(0x12);
+codeBytes.Add((byte)OperationCode.LDC);
 codeBytes.Add((byte)helloCSharpStrIndex);
 // invokevirtual PrintStream.println
-codeBytes.Add(0xB6);
+codeBytes.Add((byte)OperationCode.INVOKEVIRTUAL);
 codeBytes.AddRange(BitConverter.GetBytes(printlnMethodRefIndex).Reverse().Take(2));
 // return
-codeBytes.Add(0xB1);
+codeBytes.Add((byte)OperationCode.RETURN);
 
 // 创建 "Code" 属性
 var codeAttribute = new Attribute

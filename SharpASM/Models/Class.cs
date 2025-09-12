@@ -1,12 +1,12 @@
 using SharpASM.Models.Struct;
 using SharpASM.Models.Type;
 using SharpASM.Utilities;
+using System.Text;
 
 namespace SharpASM.Models;
 
 public class Class
 {
-    
     public uint Magic { get; set; } = 0xCAFEBABE;
     public ushort MinorVersion { get; set; } = 0;
     public ClassFileVersion MajorVersion { get; set; } = ClassFileVersion.V17;
@@ -27,7 +27,6 @@ public class Class
     public List<Method> Methods { get; set; } = new();
     public List<Attribute> Attributes { get; set; } = new();
 
-    
     public ushort CalculateConstantPoolCount()
     {
         return (ushort)(ConstantPool.Count + 1);
@@ -64,7 +63,6 @@ public class Class
 
     #region Functions (Struct)
 
-    
     public static Class FromStruct(ClassStruct classStruct)
     {
         var clazz = new Class
@@ -75,19 +73,27 @@ public class Class
             AccessFlags = (ClassAccessFlags)classStruct.AccessFlags
         };
 
-        var constantPoolStrings = new Dictionary<ushort, string>();
-        BuildConstantPoolStrings(classStruct, constantPoolStrings);
+        // Store the complete constant pool
+        clazz.ConstantPool = new List<ConstantPoolInfo>();
+        for (int i = 0; i < classStruct.ConstantPool.Length; i++)
+        {
+            var cpInfo = classStruct.ConstantPool[i];
+            if (cpInfo != null)
+            {
+                clazz.ConstantPool.Add(ConstantPoolInfo.FromStruct(cpInfo));
+            }
+        }
 
         // ThisClass & SuperClass
-        clazz.ThisClass = GetStringFromConstantPool(classStruct, classStruct.ThisClass, constantPoolStrings) ?? throw new NullReferenceException();
-        clazz.SuperClass = GetStringFromConstantPool(classStruct, classStruct.SuperClass, constantPoolStrings) ?? throw new NullReferenceException();
+        clazz.ThisClass = GetStringFromConstantPool(clazz, classStruct.ThisClass) ?? throw new NullReferenceException();
+        clazz.SuperClass = GetStringFromConstantPool(clazz, classStruct.SuperClass) ?? throw new NullReferenceException();
 
         // Interfaces
         clazz.Interfaces = new List<string>();
         for (int i = 0; i < classStruct.InterfacesCount; i++)
         {
             var interfaceIndex = classStruct.Interfaces[i];
-            var interfaceName = GetStringFromConstantPool(classStruct, interfaceIndex, constantPoolStrings);
+            var interfaceName = GetStringFromConstantPool(clazz, interfaceIndex);
             if (interfaceName != null)
                 clazz.Interfaces.Add(interfaceName);
         }
@@ -99,12 +105,12 @@ public class Class
             var field = new Field
             {
                 AccessFlags = (FieldAccessFlags)fieldStruct.AccessFlags,
-                Name = GetStringFromConstantPool(classStruct, fieldStruct.NameIndex, constantPoolStrings) ?? throw new NullReferenceException(),
-                Descriptor = GetStringFromConstantPool(classStruct, fieldStruct.DescriptorIndex, constantPoolStrings) ?? throw new NullReferenceException()
+                Name = GetStringFromConstantPool(clazz, fieldStruct.NameIndex) ?? throw new NullReferenceException(),
+                Descriptor = GetStringFromConstantPool(clazz, fieldStruct.DescriptorIndex) ?? throw new NullReferenceException()
             };
 
             // Field Attributes
-            field.Attributes = ParseAttributes(classStruct, fieldStruct.Attributes, constantPoolStrings);
+            field.Attributes = ParseAttributes(clazz, fieldStruct.Attributes);
             clazz.Fields.Add(field);
         }
 
@@ -115,17 +121,17 @@ public class Class
             var method = new Method
             {
                 AccessFlags = (MethodAccessFlags)methodStruct.AccessFlags,
-                Name = GetStringFromConstantPool(classStruct, methodStruct.NameIndex, constantPoolStrings) ?? throw new NullReferenceException(),
-                Descriptor = GetStringFromConstantPool(classStruct, methodStruct.DescriptorIndex, constantPoolStrings) ?? throw new NullReferenceException()
+                Name = GetStringFromConstantPool(clazz, methodStruct.NameIndex) ?? throw new NullReferenceException(),
+                Descriptor = GetStringFromConstantPool(clazz, methodStruct.DescriptorIndex) ?? throw new NullReferenceException()
             };
 
             // Method Attributes
-            method.Attributes = ParseAttributes(classStruct, methodStruct.Attributes, constantPoolStrings);
+            method.Attributes = ParseAttributes(clazz, methodStruct.Attributes);
             clazz.Methods.Add(method);
         }
 
         // Class Attributes
-        clazz.Attributes = ParseAttributes(classStruct, classStruct.Attributes, constantPoolStrings);
+        clazz.Attributes = ParseAttributes(clazz, classStruct.Attributes);
 
         return clazz;
     }
@@ -140,9 +146,41 @@ public class Class
             AccessFlags = (ushort)AccessFlags
         };
 
-        var constantPoolHelper = new ConstantPoolHelper(ConstantPool);
+        var constantPoolHelper = new ConstantPoolHelper(new List<ConstantPoolInfo>(ConstantPool));
 
-        AddConstantPoolEntries(constantPoolHelper);
+        // Add new constant pool entries for any new strings
+        constantPoolHelper.NewUtf8(ThisClass);
+        constantPoolHelper.NewUtf8(SuperClass);
+        
+        foreach (var interfaceName in Interfaces)
+        {
+            constantPoolHelper.NewUtf8(interfaceName);
+        }
+        
+        foreach (var field in Fields)
+        {
+            constantPoolHelper.NewUtf8(field.Name);
+            constantPoolHelper.NewUtf8(field.Descriptor);
+            foreach (var attr in field.Attributes)
+            {
+                constantPoolHelper.NewUtf8(attr.Name);
+            }
+        }
+        
+        foreach (var method in Methods)
+        {
+            constantPoolHelper.NewUtf8(method.Name);
+            constantPoolHelper.NewUtf8(method.Descriptor);
+            foreach (var attr in method.Attributes)
+            {
+                constantPoolHelper.NewUtf8(attr.Name);
+            }
+        }
+        
+        foreach (var attr in Attributes)
+        {
+            constantPoolHelper.NewUtf8(attr.Name);
+        }
 
         // ThisClass & SuperClass Index
         classStruct.ThisClass = constantPoolHelper.NewClass(ThisClass);
@@ -194,72 +232,35 @@ public class Class
 
         // Constant Pool
         classStruct.ConstantPool = constantPoolHelper.ToArray();
-        classStruct.ConstantPoolCount = (ushort)(constantPoolHelper.ConstantPoolIndexCount);
+        classStruct.ConstantPoolCount = constantPoolHelper.ConstantPoolIndexCount;
 
         return classStruct;
     }
 
-    private static void BuildConstantPoolStrings(ClassStruct classStruct, Dictionary<ushort, string> constantPoolStrings)
+    private static string? GetStringFromConstantPool(Class clazz, ushort index)
     {
-        ushort currentIndex = 1;
-        for (int i = 0; i < classStruct.ConstantPool.Length; i++)
+        if (index == 0 || index >= clazz.ConstantPoolIndexCount) return null;
+
+        int currentIndex = 1;
+        for (int i = 0; i < clazz.ConstantPool.Count; i++)
         {
-            var cpInfo = classStruct.ConstantPool[i];
-            if (cpInfo == null) continue;
-
-            var constantStruct = cpInfo.ToConstantStruct();
-            switch (constantStruct)
-            {
-                case ConstantUtf8InfoStruct utf8:
-                    constantPoolStrings[currentIndex] = utf8.ToString();
-                    break;
-                case ConstantClassInfoStruct classInfo:
-                    // 类名需要递归解析，但这里先存储索引，后续按需解析
-                    break;
-                case ConstantStringInfoStruct stringInfo:
-                    // 字符串需要递归解析，但这里先存储索引，后续按需解析
-                    break;
-            }
-
-            currentIndex++;
-            if (constantStruct is ConstantLongInfoStruct || constantStruct is ConstantDoubleInfoStruct)
-            {
-                currentIndex++;
-            }
-        }
-    }
-
-    private static string? GetStringFromConstantPool(ClassStruct classStruct, ushort index, Dictionary<ushort, string> constantPoolStrings)
-    {
-        if (constantPoolStrings.TryGetValue(index, out string? value))
-        {
-            return value;
-        }
-
-        if (index == 0 || index >= classStruct.ConstantPoolCount) return null;
-
-        ushort currentIndex = 1;
-        for (int i = 0; i < classStruct.ConstantPool.Length; i++)
-        {
-            var cpInfo = classStruct.ConstantPool[i];
-            if (cpInfo == null) continue;
-
+            var constant = clazz.ConstantPool[i];
             if (currentIndex == index)
             {
-                var constantStruct = cpInfo.ToConstantStruct();
+                var constantStruct = constant.ToStruct().ToConstantStruct();
                 return constantStruct switch
                 {
                     ConstantUtf8InfoStruct utf8 => utf8.ToString(),
-                    ConstantClassInfoStruct classInfo => GetStringFromConstantPool(classStruct, classInfo.NameIndex, constantPoolStrings),
-                    ConstantStringInfoStruct stringInfo => GetStringFromConstantPool(classStruct, stringInfo.NameIndex, constantPoolStrings),
+                    ConstantClassInfoStruct classInfo => GetStringFromConstantPool(clazz, classInfo.NameIndex),
+                    ConstantStringInfoStruct stringInfo => GetStringFromConstantPool(clazz, stringInfo.NameIndex),
                     ConstantNameAndTypeInfoStruct nameAndType => 
-                        $"{GetStringFromConstantPool(classStruct, nameAndType.NameIndex, constantPoolStrings)}:{GetStringFromConstantPool(classStruct, nameAndType.DescriptorIndex, constantPoolStrings)}",
+                        $"{GetStringFromConstantPool(clazz, nameAndType.NameIndex)}:{GetStringFromConstantPool(clazz, nameAndType.DescriptorIndex)}",
                     _ => null
                 };
             }
 
             currentIndex++;
-            if (cpInfo.Tag == (byte)ConstantPoolTag.Long || cpInfo.Tag == (byte)ConstantPoolTag.Double)
+            if (constant.Tag == ConstantPoolTag.Long || constant.Tag == ConstantPoolTag.Double)
             {
                 currentIndex++;
             }
@@ -268,51 +269,19 @@ public class Class
         return null;
     }
 
-    private static List<Attribute> ParseAttributes(ClassStruct classStruct, AttributeInfoStruct[] attributes, Dictionary<ushort, string> constantPoolStrings)
+    private static List<Attribute> ParseAttributes(Class clazz, AttributeInfoStruct[] attributes)
     {
         var result = new List<Attribute>();
         foreach (var attr in attributes)
         {
             var attribute = new Attribute
             {
-                Name = GetStringFromConstantPool(classStruct, attr.AttributeNameIndex, constantPoolStrings) ?? throw new NullReferenceException(),
+                Name = GetStringFromConstantPool(clazz, attr.AttributeNameIndex) ?? throw new NullReferenceException(),
                 Info = attr.Info
             };
             result.Add(attribute);
         }
         return result;
-    }
-
-    private void AddConstantPoolEntries(ConstantPoolHelper constantPoolHelper)
-    {
-        constantPoolHelper.NewUtf8(ThisClass);
-        constantPoolHelper.NewUtf8(SuperClass);
-        foreach (var interfaceName in Interfaces)
-        {
-            constantPoolHelper.NewUtf8(interfaceName);
-        }
-        foreach (var field in Fields)
-        {
-            constantPoolHelper.NewUtf8(field.Name);
-            constantPoolHelper.NewUtf8(field.Descriptor);
-            foreach (var attr in field.Attributes)
-            {
-                constantPoolHelper.NewUtf8(attr.Name);
-            }
-        }
-        foreach (var method in Methods)
-        {
-            constantPoolHelper.NewUtf8(method.Name);
-            constantPoolHelper.NewUtf8(method.Descriptor);
-            foreach (var attr in method.Attributes)
-            {
-                constantPoolHelper.NewUtf8(attr.Name);
-            }
-        }
-        foreach (var attr in Attributes)
-        {
-            constantPoolHelper.NewUtf8(attr.Name);
-        }
     }
 
     private static AttributeInfoStruct[] ConvertAttributes(List<Attribute> attributes, ConstantPoolHelper constantPoolHelper)
@@ -332,5 +301,4 @@ public class Class
     }
 
     #endregion
-    
 }

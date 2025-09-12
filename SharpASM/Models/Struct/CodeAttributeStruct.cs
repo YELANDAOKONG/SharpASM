@@ -1,4 +1,5 @@
 using SharpASM.Models.Struct.Interfaces;
+using SharpASM.Parsers;
 using SharpASM.Utilities;
 
 namespace SharpASM.Models.Struct;
@@ -43,8 +44,16 @@ public class CodeAttributeStruct : IAttributeStruct
     public ushort AttributesCount { get; set; }
     public AttributeInfoStruct[] Attributes { get; set; } = [];
 
-    
-    // TODO...
+    public void SetCode(List<Code.Code> codes)
+    {
+        Code = ByteCodeParser.Serialize(codes);
+        CodeLength = (uint) Code.Length;
+    }
+
+    public List<Code.Code> GetCode()
+    {
+        return ByteCodeParser.Parse(Code);
+    }
     
     public byte[] ToBytes()
     {

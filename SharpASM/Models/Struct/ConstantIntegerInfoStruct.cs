@@ -46,13 +46,33 @@ public class ConstantIntegerInfoStruct : IConstantStruct
         return stream.ToArray();
     }
 
+    
     public int GetValue()
     {
-        return (int)Bytes;
+        byte[] byteArray = new byte[4];
+        byteArray[0] = (byte)(Bytes >> 24);
+        byteArray[1] = (byte)(Bytes >> 16);
+        byteArray[2] = (byte)(Bytes >> 8);
+        byteArray[3] = (byte)Bytes;
+    
+        // Convert from big-endian to system endianness
+        if (BitConverter.IsLittleEndian)
+        {
+            Array.Reverse(byteArray);
+        }
+        return BitConverter.ToInt32(byteArray, 0);
     }
         
     public void SetValue(int value)
     {
-        Bytes = (uint)value;
+        byte[] byteArray = BitConverter.GetBytes(value);
+    
+        // Convert from system endianness to big-endian
+        if (BitConverter.IsLittleEndian)
+        {
+            Array.Reverse(byteArray);
+        }
+    
+        Bytes = (uint)((byteArray[0] << 24) | (byteArray[1] << 16) | (byteArray[2] << 8) | byteArray[3]);
     }
 }

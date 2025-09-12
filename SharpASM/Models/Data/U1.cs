@@ -15,4 +15,14 @@ public struct U1 : IU
             throw new ArgumentException("Insufficient byte array length");
         return new U1 { Byte1 = bytes[0] };
     }
+
+    public byte ToByte(bool bigEndian = true)
+    {
+        return Byte1;
+    }
+
+    public static U1 FromByte(byte data, bool bigEndian = true)
+    {
+        return new U1 { Byte1 = data };
+    }
 }

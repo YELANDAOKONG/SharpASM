@@ -8,4 +8,6 @@ public interface IConstantStruct
     
     public byte[] ToBytes();
     public byte[] ToBytesWithoutTag();
+    
+    public ConstantPoolInfoStruct ToStructInfo();
 }

@@ -53,4 +53,14 @@ public class ConstantInterfaceMethodrefInfoStruct : IConstantStruct
         ByteUtils.WriteUInt16(NameAndTypeIndex, stream);
         return stream.ToArray();
     }
+    
+    public ConstantPoolInfoStruct ToStructInfo()
+    {
+        ConstantPoolInfoStruct result = new ConstantPoolInfoStruct()
+        {
+            Tag = Tag,
+            Info = ToBytesWithoutTag()
+        };
+        return result;
+    }
 }

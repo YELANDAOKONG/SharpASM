@@ -47,4 +47,14 @@ public class ConstantPackageInfoStruct : IConstantStruct
         ByteUtils.WriteUInt16(NameIndex, stream);
         return stream.ToArray();
     }
+    
+    public ConstantPoolInfoStruct ToStructInfo()
+    {
+        ConstantPoolInfoStruct result = new ConstantPoolInfoStruct()
+        {
+            Tag = Tag,
+            Info = ToBytesWithoutTag()
+        };
+        return result;
+    }
 }

@@ -70,4 +70,14 @@ public class ConstantUtf8InfoStruct : IConstantStruct
     {
         return System.Text.Encoding.UTF8.GetString(Bytes);
     }
+    
+    public ConstantPoolInfoStruct ToStructInfo()
+    {
+        ConstantPoolInfoStruct result = new ConstantPoolInfoStruct()
+        {
+            Tag = Tag,
+            Info = ToBytesWithoutTag()
+        };
+        return result;
+    }
 }

@@ -66,4 +66,14 @@ public class ConstantDoubleInfoStruct : IConstantStruct
         HighBytes = (uint)(longValue >> 32);
         LowBytes = (uint)longValue;
     }
+    
+    public ConstantPoolInfoStruct ToStructInfo()
+    {
+        ConstantPoolInfoStruct result = new ConstantPoolInfoStruct()
+        {
+            Tag = Tag,
+            Info = ToBytesWithoutTag()
+        };
+        return result;
+    }
 }

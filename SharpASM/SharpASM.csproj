@@ -5,7 +5,12 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageId>SharpMC.SharpASM</PackageId>
-        <Version>1.0.3.0</Version>
+        <Version>1.0.3.1</Version>
+        <Title>SharpASM</Title>
+        <Authors>YELANDAOKONG</Authors>
+        <Description>Use C# Edit Java Class Bytecodes</Description>
+        <PackageProjectUrl>https://github.com/YELANDAOKONG/SharpASM</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/YELANDAOKONG/SharpASM</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>

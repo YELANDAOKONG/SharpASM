@@ -14,11 +14,11 @@ public class StackMapFrameStruct
        }
      */
 
-    public SameFrameStruct SameFrame { get; set; } = new();
-    public SameLocals1StackItemFrameStruct SameLocals1StackItemFrame { get; set; } = new();
-    public SameLocals1StackItemFrameExtendedStruct SameLocals1StackItemFrameExtended { get; set; } = new();
-    public ChopFrameStruct ChopFrame { get; set; } = new();
-    public SameFrameExtendedStruct SameFrameExtended { get; set; } = new();
-    public AppendFrameStruct AppendFrame { get; set; } = new();
-    public FullFrameStruct FullFrame { get; set; } = new();
+    public SameFrameStruct? SameFrame { get; set; } = null;
+    public SameLocals1StackItemFrameStruct? SameLocals1StackItemFrame { get; set; } = null;
+    public SameLocals1StackItemFrameExtendedStruct? SameLocals1StackItemFrameExtended { get; set; } = null;
+    public ChopFrameStruct? ChopFrame { get; set; } = null;
+    public SameFrameExtendedStruct? SameFrameExtended { get; set; } = null;
+    public AppendFrameStruct? AppendFrame { get; set; } = null;
+    public FullFrameStruct? FullFrame { get; set; } = null;
 }

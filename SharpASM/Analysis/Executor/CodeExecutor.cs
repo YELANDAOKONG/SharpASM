@@ -17,5 +17,18 @@ public class CodeExecutor
         Codes = byteCodes;
     }
     
+    // public StackMapTableAttributeStruct RebuildStackMapTable()
+    // {
+    //     AnalyzeControlFlow();
+    //     InitializeInitialFrameState();
+    //     SimulateExecution();
+    //     var frames = BuildFrames();
+    //         
+    //     return new StackMapTableAttributeStruct
+    //     {
+    //         Entries = frames.ToArray()
+    //     };
+    // }
+    
     // TODO...
 }

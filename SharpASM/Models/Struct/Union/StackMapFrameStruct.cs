@@ -21,4 +21,37 @@ public class StackMapFrameStruct
     public SameFrameExtendedStruct? SameFrameExtended { get; set; } = null;
     public AppendFrameStruct? AppendFrame { get; set; } = null;
     public FullFrameStruct? FullFrame { get; set; } = null;
+    
+    public byte[] ToBytes()
+    {
+        if (SameFrame != null)
+        {
+            return SameFrame.ToBytes();
+        }
+        if (SameLocals1StackItemFrame != null)
+        {
+            return SameLocals1StackItemFrame.ToBytes();
+        }
+        if (SameLocals1StackItemFrameExtended != null)
+        {
+            return SameLocals1StackItemFrameExtended.ToBytes();
+        }
+        if (ChopFrame != null)
+        {
+            return ChopFrame.ToBytes();
+        }
+        if (SameFrameExtended != null)
+        {
+            return SameFrameExtended.ToBytes();
+        }
+        if (AppendFrame != null)
+        {
+            return AppendFrame.ToBytes();
+        }
+        if (FullFrame != null)
+        {
+            return FullFrame.ToBytes();
+        }
+        throw new InvalidOperationException("No stack map frame set");
+    }
 }

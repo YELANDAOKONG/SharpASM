@@ -9,4 +9,9 @@ public class SameFrameStruct
      */
 
     public byte FrameType { get; set; }
+    
+    public byte[] ToBytes()
+    {
+        return new byte[] { FrameType };
+    }
 }

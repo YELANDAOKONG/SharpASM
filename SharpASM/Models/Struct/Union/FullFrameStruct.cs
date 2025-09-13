@@ -1,3 +1,5 @@
+using SharpASM.Utilities;
+
 namespace SharpASM.Models.Struct.Union;
 
 public class FullFrameStruct
@@ -16,8 +18,30 @@ public class FullFrameStruct
     public byte FrameType { get; set; }
     public ushort OffsetDelta { get; set; }
     public ushort NumberOfLocals { get; set; }
-    private VerificationTypeInfoStruct[] Locals { get; set; } = [];
+    public VerificationTypeInfoStruct[] Locals { get; set; } = [];
     public ushort NumberOfStackItems { get; set; }
-    private VerificationTypeInfoStruct[] Stack { get; set; } = [];
+    public VerificationTypeInfoStruct[] Stack { get; set; } = [];
+    
+    public byte[] ToBytes()
+    {
+        using (var stream = new MemoryStream())
+        {
+            stream.WriteByte(FrameType);
+            ByteUtils.WriteUInt16(OffsetDelta, stream);
+            ByteUtils.WriteUInt16(NumberOfLocals, stream);
+            for (int i = 0; i < NumberOfLocals; i++)
+            {
+                var localBytes = Locals[i].ToBytes();
+                stream.Write(localBytes, 0, localBytes.Length);
+            }
+            ByteUtils.WriteUInt16(NumberOfStackItems, stream);
+            for (int i = 0; i < NumberOfStackItems; i++)
+            {
+                var stackBytes = Stack[i].ToBytes();
+                stream.Write(stackBytes, 0, stackBytes.Length);
+            }
+            return stream.ToArray();
+        }
+    }
 
 }

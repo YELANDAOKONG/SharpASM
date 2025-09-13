@@ -1,3 +1,5 @@
+using SharpASM.Utilities;
+
 namespace SharpASM.Models.Struct.Union;
 
 public class SameFrameExtendedStruct
@@ -11,4 +13,14 @@ public class SameFrameExtendedStruct
     
     public byte FrameType { get; set; }
     public ushort OffsetDelta { get; set; }
+    
+    public byte[] ToBytes()
+    {
+        using (var stream = new MemoryStream())
+        {
+            stream.WriteByte(FrameType);
+            ByteUtils.WriteUInt16(OffsetDelta, stream);
+            return stream.ToArray();
+        }
+    }
 }

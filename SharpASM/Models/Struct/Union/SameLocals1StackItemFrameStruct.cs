@@ -11,4 +11,19 @@ public class SameLocals1StackItemFrameStruct
     
     public byte FrameType { get; set; }
     public VerificationTypeInfoStruct[] Stack { get; set; } = [];
+    
+    public byte[] ToBytes()
+    {
+        using (var stream = new MemoryStream())
+        {
+            stream.WriteByte(FrameType);
+            if (Stack.Length != 1)
+            {
+                throw new InvalidOperationException("Stack must have exactly one item");
+            }
+            var stackBytes = Stack[0].ToBytes();
+            stream.Write(stackBytes, 0, stackBytes.Length);
+            return stream.ToArray();
+        }
+    }
 }

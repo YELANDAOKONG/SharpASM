@@ -11,6 +11,7 @@
         <Description>Use C# Edit Java Class Bytecodes</Description>
         <PackageProjectUrl>https://github.com/YELANDAOKONG/SharpASM</PackageProjectUrl>
         <RepositoryUrl>https://github.com/YELANDAOKONG/SharpASM</RepositoryUrl>
+        <PackageLicenseUrl>https://raw.githubusercontent.com/YELANDAOKONG/SharpASM/refs/heads/master/LICENSE</PackageLicenseUrl>
     </PropertyGroup>
 
     <ItemGroup>

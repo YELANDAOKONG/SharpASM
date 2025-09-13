@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SharpASM.Models.Struct;
-using SharpASM.Models.Type;
 
 namespace SharpASM.Analysis
 {

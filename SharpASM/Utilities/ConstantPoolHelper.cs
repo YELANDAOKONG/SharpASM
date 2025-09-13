@@ -729,6 +729,34 @@ public class ConstantPoolHelper
     
 
     #endregion
+    
+    public ConstantPoolInfo? ByIndex(ushort index)
+    {
+        if (index == 0 || index > ConstantPoolIndexCount)
+            return null;
+    
+        ushort currentIndex = 1;
+        foreach (var constant in ConstantPool)
+        {
+            if (currentIndex == index)
+                return constant;
+        
+            if (constant.Tag == ConstantPoolTag.Long || 
+                constant.Tag == ConstantPoolTag.Double)
+            {
+                currentIndex += 2;
+            }
+            else
+            {
+                currentIndex += 1;
+            }
+        
+            if (currentIndex > index)
+                break;
+        }
+    
+        return null;
+    }
 
     public List<ConstantPoolInfo> ToList()
     {

@@ -16,13 +16,13 @@ public class VerificationTypeInfoStruct
        }
      */
 
-    public TopVariableInfoStruct TopVariableInfo { get; set; } = new();
-    public IntegerVariableInfoStruct IntegerVariableInfo { get; set; } = new();
-    public FloatVariableInfoStruct FloatVariableInfo { get; set; } = new();
-    public LongVariableInfoStruct LongVariableInfo { get; set; } = new();
-    public DoubleVariableInfoStruct DoubleVariableInfo { get; set; } = new();
-    public NullVariableInfoStruct NullVariableInfo { get; set; } = new();
-    public UninitializedThisVariableInfoStruct UninitializedThisVariableInfo { get; set; } = new();
-    public ObjectVariableInfoStruct ObjectVariableInfo { get; set; } = new();
-    public UninitializedVariableInfoStruct UninitializedVariableInfo { get; set; } = new();
+    public TopVariableInfoStruct? TopVariableInfo { get; set; } = null;
+    public IntegerVariableInfoStruct? IntegerVariableInfo { get; set; } = null;
+    public FloatVariableInfoStruct? FloatVariableInfo { get; set; } = null;
+    public LongVariableInfoStruct? LongVariableInfo { get; set; } = null;
+    public DoubleVariableInfoStruct? DoubleVariableInfo { get; set; } = null;
+    public NullVariableInfoStruct? NullVariableInfo { get; set; } = null;
+    public UninitializedThisVariableInfoStruct? UninitializedThisVariableInfo { get; set; } = null;
+    public ObjectVariableInfoStruct? ObjectVariableInfo { get; set; } = null;
+    public UninitializedVariableInfoStruct? UninitializedVariableInfo { get; set; } = null;
 }

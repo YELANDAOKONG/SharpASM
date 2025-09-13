@@ -28,16 +28,16 @@ public class TypeAnnotationStruct
     
     public class TargetInfoUnion
     {
-        public TypeParameterTargetStruct TypeParameterTarget { get; set; } = new();
-        public SupertypeTargetStruct SupertypeTarget { get; set; } = new();
-        public TypeParameterBoundTargetStruct TypeParameterBoundTarget { get; set; } = new();
-        public EmptyTargetStruct EmptyTarget { get; set; } = new();
-        public FormalParameterTargetStruct FormalParameterTarget { get; set; } = new();
-        public ThrowsTargetStruct ThrowsTarget { get; set; } = new();
-        public LocalvarTargetStruct LocalvarTarget { get; set; } = new();
-        public CatchTargetStruct CatchTarget { get; set; } = new();
-        public OffsetTargetStruct OffsetTarget { get; set; } = new();
-        public TypeArgumentTargetStruct TypeArgumentTarget { get; set; } = new();
+        public TypeParameterTargetStruct? TypeParameterTarget { get; set; } = null;
+        public SupertypeTargetStruct? SupertypeTarget { get; set; } = null;
+        public TypeParameterBoundTargetStruct? TypeParameterBoundTarget { get; set; } = null;
+        public EmptyTargetStruct? EmptyTarget { get; set; } = null;
+        public FormalParameterTargetStruct? FormalParameterTarget { get; set; } = null;
+        public ThrowsTargetStruct? ThrowsTarget { get; set; } = null;
+        public LocalvarTargetStruct? LocalvarTarget { get; set; } = null;
+        public CatchTargetStruct? CatchTarget { get; set; } = null;
+        public OffsetTargetStruct? OffsetTarget { get; set; } = null;
+        public TypeArgumentTargetStruct? TypeArgumentTarget { get; set; } = null;
     }
     
     public byte TargetType { get; set; }

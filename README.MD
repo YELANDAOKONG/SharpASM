@@ -57,6 +57,165 @@
 [@] -  -  - RETURN []
 ```
 
+### 字节码解析效果 ( 完整版 )
+
+```csharp
+[@] Magic: 0xCAFEBABE
+[@] Minor Version: 0
+[@] Major Version: V21
+[@] Constant Pool: 85 Length
+[@] Constant Pool: 87 Index
+[@] Access Flags: Public | Super
+[@] This Class: MainPlus
+[@] Super Class: java/lang/Object
+[@] Constant Pool: 
+[@] - Constant: (Methodref) #2.#3
+[@] - Constant: (Class) #4
+[@] - Constant: (NameAndType) #5:#6
+[@] - Constant: (Utf8) "java/lang/Object"
+[@] - Constant: (Utf8) "<init>"
+[@] - Constant: (Utf8) "()V"
+[@] - Constant: (Fieldref) #8.#9
+[@] - Constant: (Class) #10
+[@] - Constant: (NameAndType) #11:#12
+[@] - Constant: (Utf8) "java/lang/System"
+[@] - Constant: (Utf8) "out"
+[@] - Constant: (Utf8) "Ljava/io/PrintStream;"
+[@] - Constant: (String) #14
+[@] - Constant: (Utf8) "Hello and welcome! "
+[@] - Constant: (Methodref) #16.#17
+[@] - Constant: (Class) #18
+[@] - Constant: (NameAndType) #19:#20
+[@] - Constant: (Utf8) "java/io/PrintStream"
+[@] - Constant: (Utf8) "println"
+[@] - Constant: (Utf8) "(Ljava/lang/String;)V"
+[@] - Constant: (InvokeDynamic) #0.#22
+[@] - Constant: (NameAndType) #23:#24
+[@] - Constant: (Utf8) "makeConcatWithConstants"
+[@] - Constant: (Utf8) "(I)Ljava/lang/String;"
+[@] - Constant: (Integer) 123456
+[@] - Constant: (Fieldref) #27.#28
+[@] - Constant: (Class) #29
+[@] - Constant: (NameAndType) #30:#31
+[@] - Constant: (Utf8) "MainPlus"
+[@] - Constant: (Utf8) "Int"
+[@] - Constant: (Utf8) "I"
+[@] - Constant: (Long) 123456789L
+[@] - Constant: (Fieldref) #27.#35
+[@] - Constant: (NameAndType) #36:#37
+[@] - Constant: (Utf8) "Long"
+[@] - Constant: (Utf8) "J"
+[@] - Constant: (Float) 123.456
+[@] - Constant: (Fieldref) #27.#40
+[@] - Constant: (NameAndType) #41:#42
+[@] - Constant: (Utf8) "Float"
+[@] - Constant: (Utf8) "F"
+[@] - Constant: (Double) 123.456789D
+[@] - Constant: (Fieldref) #27.#46
+[@] - Constant: (NameAndType) #47:#48
+[@] - Constant: (Utf8) "Double"
+[@] - Constant: (Utf8) "D"
+[@] - Constant: (Utf8) "IntFinal"
+[@] - Constant: (Utf8) "ConstantValue"
+[@] - Constant: (Utf8) "LongFinal"
+[@] - Constant: (Utf8) "FloatFinal"
+[@] - Constant: (Utf8) "DoubleFinal"
+[@] - Constant: (Utf8) "StringFinal"
+[@] - Constant: (Utf8) "Ljava/lang/String;"
+[@] - Constant: (String) #57
+[@] - Constant: (Utf8) "Hello, World! "
+[@] - Constant: (Utf8) "Code"
+[@] - Constant: (Utf8) "LineNumberTable"
+[@] - Constant: (Utf8) "LocalVariableTable"
+[@] - Constant: (Utf8) "this"
+[@] - Constant: (Utf8) "LMainPlus;"
+[@] - Constant: (Utf8) "main"
+[@] - Constant: (Utf8) "([Ljava/lang/String;)V"
+[@] - Constant: (Utf8) "i"
+[@] - Constant: (Utf8) "args"
+[@] - Constant: (Utf8) "[Ljava/lang/String;"
+[@] - Constant: (Utf8) "StackMapTable"
+[@] - Constant: (Utf8) "<clinit>"
+[@] - Constant: (Utf8) "SourceFile"
+[@] - Constant: (Utf8) "MainPlus.java"
+[@] - Constant: (Utf8) "BootstrapMethods"
+[@] - Constant: (String) #74
+[@] - Constant: (Utf8) "i = "
+[@] - Constant: (MethodHandle) 6.#76
+[@] - Constant: (Methodref) #77.#78
+[@] - Constant: (Class) #79
+[@] - Constant: (NameAndType) #23:#80
+[@] - Constant: (Utf8) "java/lang/invoke/StringConcatFactory"
+[@] - Constant: (Utf8) "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;"
+[@] - Constant: (Utf8) "InnerClasses"
+[@] - Constant: (Class) #83
+[@] - Constant: (Utf8) "java/lang/invoke/MethodHandles$Lookup"
+[@] - Constant: (Class) #85
+[@] - Constant: (Utf8) "java/lang/invoke/MethodHandles"
+[@] - Constant: (Utf8) "Lookup"
+[@] Attributes: 
+[@] - Attribute: SourceFile (2 Bytes)
+[@] - Attribute: BootstrapMethods (8 Bytes)
+[@] - Attribute: InnerClasses (10 Bytes)
+[@] Fields: 
+[@] - Field: Int I [ Public | Static ]
+[@] - Field: IntFinal I [ Public | Static | Final ]
+[@] -  - Attribute: ConstantValue (2 Bytes)
+[@] -  -  - ConstantValue: (Integer) 123456
+[@] - Field: Long J [ Public | Static ]
+[@] - Field: LongFinal J [ Public | Static | Final ]
+[@] -  - Attribute: ConstantValue (2 Bytes)
+[@] -  -  - ConstantValue: (Long) 123456789L
+[@] - Field: Float F [ Public | Static ]
+[@] - Field: FloatFinal F [ Public | Static | Final ]
+[@] -  - Attribute: ConstantValue (2 Bytes)
+[@] -  -  - ConstantValue: (Float) 123.456
+[@] - Field: Double D [ Public | Static ]
+[@] - Field: DoubleFinal D [ Public | Static | Final ]
+[@] -  - Attribute: ConstantValue (2 Bytes)
+[@] -  -  - ConstantValue: (Double) 123.456789D
+[@] - Field: StringFinal Ljava/lang/String; [ Public | Static | Final ]
+[@] -  - Attribute: ConstantValue (2 Bytes)
+[@] -  -  - ConstantValue: (String) #57
+[@] -  -  -  - String Value: "Hello, World! "
+[@] Methods: 
+[@] - Method: <init> ()V [ Public ]
+[@] -  - Attribute: Code (47 Bytes)
+[@] -  -  - ALOAD_0 []
+[@] -  -  - INVOKESPECIAL [0x0001]
+[@] -  -  - RETURN []
+[@] - Method: main ([Ljava/lang/String;)V [ Public | Static ]
+[@] -  - Attribute: Code (117 Bytes)
+[@] -  -  - GETSTATIC [0x0007]
+[@] -  -  - LDC [0x0D]
+[@] -  -  - INVOKEVIRTUAL [0x000F]
+[@] -  -  - ICONST_1 []
+[@] -  -  - ISTORE_1 []
+[@] -  -  - ILOAD_1 []
+[@] -  -  - ICONST_5 []
+[@] -  -  - IF_ICMPGT [0x0015]
+[@] -  -  - GETSTATIC [0x0007]
+[@] -  -  - ILOAD_1 []
+[@] -  -  - INVOKEDYNAMIC [0x0015]
+[@] -  -  - NOP []
+[@] -  -  - NOP []
+[@] -  -  - INVOKEVIRTUAL [0x000F]
+[@] -  -  - IINC [0x01, 0x01]
+[@] -  -  - GOTO [0xFFEC]
+[@] -  -  - RETURN []
+[@] - Method: <clinit> ()V [ Static ]
+[@] -  - Attribute: Code (59 Bytes)
+[@] -  -  - LDC [0x19]
+[@] -  -  - PUTSTATIC [0x001A]
+[@] -  -  - LDC2_W [0x0020]
+[@] -  -  - PUTSTATIC [0x0022]
+[@] -  -  - LDC [0x26]
+[@] -  -  - PUTSTATIC [0x0027]
+[@] -  -  - LDC2_W [0x002B]
+[@] -  -  - PUTSTATIC [0x002D]
+[@] -  -  - RETURN []
+```
+
 ### 构建字节码 ( 字节码 API )
 
 ```csharp

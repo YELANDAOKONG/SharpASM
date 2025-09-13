@@ -133,6 +133,7 @@ public class StackMapTableRebuilder
     /// </summary>
     private FrameState ExecuteInstruction(Code code, FrameState state, int offset)
     {
+        // TODO...
         var newState = state.Clone();
             
         // 根据指令类型更新状态

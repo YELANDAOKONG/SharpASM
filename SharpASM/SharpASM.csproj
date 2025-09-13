@@ -21,9 +21,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Classes\" />
       <Folder Include="Converters\" />
-      <Folder Include="Core\Class\" />
-      <Folder Include="Core\Struct\" />
+      <Folder Include="Core\" />
+      <Folder Include="Structs\" />
     </ItemGroup>
 
 </Project>

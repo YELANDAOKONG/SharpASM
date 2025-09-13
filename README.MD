@@ -8,6 +8,55 @@
 
 ## 示例
 
+### 字节码解析效果
+
+```text
+[@] This Class: LongMain
+[@] Super Class: java/lang/Object
+[@] - Field: Int I [ Public | Static ]
+[@] - Field: Long J [ Public | Static ]
+[@] - Field: Float F [ Public | Static ]
+[@] - Field: Double D [ Public | Static ]
+[@] - Method: <init> ()V [ Public ]
+[@] -  - Attribute: Code (47 Bytes)
+[@] -  -  - ALOAD_0 []
+[@] -  -  - INVOKESPECIAL [0x0001]
+[@] -  -  - RETURN []
+[@] - Method: main ([Ljava/lang/String;)V [ Public | Static ]
+[@] -  - Attribute: Code (122 Bytes)
+[@] -  -  - GETSTATIC [0x0007]
+[@] -  -  - LDC [0x0D]
+[@] -  -  - ICONST_0 []
+[@] -  -  - ANEWARRAY [0x0002]
+[@] -  -  - INVOKEVIRTUAL [0x000F]
+[@] -  -  - POP []
+[@] -  -  - ICONST_1 []
+[@] -  -  - ISTORE_1 []
+[@] -  -  - ILOAD_1 []
+[@] -  -  - ICONST_5 []
+[@] -  -  - IF_ICMPGT [0x0015]
+[@] -  -  - GETSTATIC [0x0007]
+[@] -  -  - ILOAD_1 []
+[@] -  -  - INVOKEDYNAMIC [0x0015]
+[@] -  -  - NOP []
+[@] -  -  - NOP []
+[@] -  -  - INVOKEVIRTUAL [0x0019]
+[@] -  -  - IINC [0x01, 0x01]
+[@] -  -  - GOTO [0xFFEC]
+[@] -  -  - RETURN []
+[@] - Method: <clinit> ()V [ Static ]
+[@] -  - Attribute: Code (59 Bytes)
+[@] -  -  - LDC [0x1D]
+[@] -  -  - PUTSTATIC [0x001E]
+[@] -  -  - LDC2_W [0x0024]
+[@] -  -  - PUTSTATIC [0x0026]
+[@] -  -  - LDC [0x2A]
+[@] -  -  - PUTSTATIC [0x002B]
+[@] -  -  - LDC2_W [0x002F]
+[@] -  -  - PUTSTATIC [0x0031]
+[@] -  -  - RETURN []
+```
+
 ### 构建字节码 ( 字节码 API )
 
 ```csharp

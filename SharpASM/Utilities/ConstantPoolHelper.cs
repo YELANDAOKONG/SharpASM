@@ -730,6 +730,490 @@ public class ConstantPoolHelper
 
     #endregion
     
+    #region Function (Find Methods)
+
+    public ushort? FindUtf8(string text)
+    {
+        byte[] utf8Bytes = Encoding.UTF8.GetBytes(text);
+        
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Utf8)
+            {
+                var cpi = (ConstantUtf8InfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.Length == utf8Bytes.Length && cpi.Bytes.SequenceEqual(utf8Bytes))
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindInteger(int value)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Integer)
+            {
+                var cpi = (ConstantIntegerInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.GetValue() == value)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindFloat(float value)
+    {
+        var target = new ConstantFloatInfoStruct();
+        target.SetValue(value);
+        
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Float)
+            {
+                var cpi = (ConstantFloatInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.Bytes == target.Bytes)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindLong(long value)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Long)
+            {
+                var cpi = (ConstantLongInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.GetValue() == value)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindDouble(double value)
+    {
+        var target = new ConstantDoubleInfoStruct();
+        target.SetValue(value);
+        
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Double)
+            {
+                var cpi = (ConstantDoubleInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.LowBytes == target.LowBytes && cpi.HighBytes == target.HighBytes)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindClass(string className)
+    {
+        ushort? nameIndex = FindUtf8(className);
+        if (nameIndex == null) return null;
+        return FindClass(nameIndex.Value);
+    }
+
+    public ushort? FindClass(ushort nameIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Class)
+            {
+                var cpi = (ConstantClassInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.NameIndex == nameIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindString(string value)
+    {
+        ushort? nameIndex = FindUtf8(value);
+        if (nameIndex == null) return null;
+        return FindString(nameIndex.Value);
+    }
+
+    public ushort? FindString(ushort nameIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.String)
+            {
+                var cpi = (ConstantStringInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.NameIndex == nameIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindFieldref(string className, string fieldName, string fieldDescriptor)
+    {
+        ushort? classIndex = FindClass(className);
+        if (classIndex == null) return null;
+        
+        ushort? nameAndTypeIndex = FindNameAndType(fieldName, fieldDescriptor);
+        if (nameAndTypeIndex == null) return null;
+        
+        return FindFieldref(classIndex.Value, nameAndTypeIndex.Value);
+    }
+
+    public ushort? FindFieldref(ushort classIndex, ushort nameAndTypeIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Fieldref)
+            {
+                var cpi = (ConstantFieldrefInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.ClassIndex == classIndex && cpi.NameAndTypeIndex == nameAndTypeIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindMethodref(string className, string methodName, string methodDescriptor)
+    {
+        ushort? classIndex = FindClass(className);
+        if (classIndex == null) return null;
+        
+        ushort? nameAndTypeIndex = FindNameAndType(methodName, methodDescriptor);
+        if (nameAndTypeIndex == null) return null;
+        
+        return FindMethodref(classIndex.Value, nameAndTypeIndex.Value);
+    }
+
+    public ushort? FindMethodref(ushort classIndex, ushort nameAndTypeIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Methodref)
+            {
+                var cpi = (ConstantMethodrefInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.ClassIndex == classIndex && cpi.NameAndTypeIndex == nameAndTypeIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindInterfaceMethodref(string className, string methodName, string methodDescriptor)
+    {
+        ushort? classIndex = FindClass(className);
+        if (classIndex == null) return null;
+        
+        ushort? nameAndTypeIndex = FindNameAndType(methodName, methodDescriptor);
+        if (nameAndTypeIndex == null) return null;
+        
+        return FindInterfaceMethodref(classIndex.Value, nameAndTypeIndex.Value);
+    }
+
+    public ushort? FindInterfaceMethodref(ushort classIndex, ushort nameAndTypeIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.InterfaceMethodref)
+            {
+                var cpi = (ConstantInterfaceMethodrefInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.ClassIndex == classIndex && cpi.NameAndTypeIndex == nameAndTypeIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindNameAndType(string name, string descriptor)
+    {
+        ushort? nameIndex = FindUtf8(name);
+        if (nameIndex == null) return null;
+        
+        ushort? descriptorIndex = FindUtf8(descriptor);
+        if (descriptorIndex == null) return null;
+        
+        return FindNameAndType(nameIndex.Value, descriptorIndex.Value);
+    }
+
+    public ushort? FindNameAndType(ushort nameIndex, ushort descriptorIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.NameAndType)
+            {
+                var cpi = (ConstantNameAndTypeInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.NameIndex == nameIndex && cpi.DescriptorIndex == descriptorIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindMethodHandle(byte referenceKind, ushort referenceIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.MethodHandle)
+            {
+                var cpi = (ConstantMethodHandleInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.ReferenceKind == referenceKind && cpi.ReferenceIndex == referenceIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindMethodType(string descriptor)
+    {
+        ushort? descriptorIndex = FindUtf8(descriptor);
+        if (descriptorIndex == null) return null;
+        return FindMethodType(descriptorIndex.Value);
+    }
+
+    public ushort? FindMethodType(ushort descriptorIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.MethodType)
+            {
+                var cpi = (ConstantMethodTypeInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.DescriptorIndex == descriptorIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindDynamic(ushort bootstrapMethodAttrIndex, ushort nameAndTypeIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Dynamic)
+            {
+                var cpi = (ConstantDynamicInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.BootstrapMethodAttrIndex == bootstrapMethodAttrIndex && 
+                    cpi.NameAndTypeIndex == nameAndTypeIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindInvokeDynamic(ushort bootstrapMethodAttrIndex, ushort nameAndTypeIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.InvokeDynamic)
+            {
+                var cpi = (ConstantInvokeDynamicInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.BootstrapMethodAttrIndex == bootstrapMethodAttrIndex && 
+                    cpi.NameAndTypeIndex == nameAndTypeIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindModule(string name)
+    {
+        ushort? nameIndex = FindUtf8(name);
+        if (nameIndex == null) return null;
+        return FindModule(nameIndex.Value);
+    }
+
+    public ushort? FindModule(ushort nameIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Module)
+            {
+                var cpi = (ConstantModuleInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.NameIndex == nameIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    public ushort? FindPackage(string name)
+    {
+        ushort? nameIndex = FindUtf8(name);
+        if (nameIndex == null) return null;
+        return FindPackage(nameIndex.Value);
+    }
+
+    public ushort? FindPackage(ushort nameIndex)
+    {
+        ushort index = 1;
+        foreach (var c in ConstantPool)
+        {
+            if (c.Tag == ConstantPoolTag.Package)
+            {
+                var cpi = (ConstantPackageInfoStruct)(c.ToStruct().ToConstantStruct());
+                if (cpi.NameIndex == nameIndex)
+                {
+                    return index;
+                }
+            }
+            index++;
+            if (c.Tag == ConstantPoolTag.Long || c.Tag == ConstantPoolTag.Double)
+            {
+                index++;
+            }
+        }
+        
+        return null;
+    }
+
+    #endregion
+    
     public ConstantPoolInfo? ByIndex(ushort index)
     {
         if (index == 0 || index > ConstantPoolIndexCount)

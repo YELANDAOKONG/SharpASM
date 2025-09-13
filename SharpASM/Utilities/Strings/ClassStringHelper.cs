@@ -42,7 +42,7 @@ public class ClassStringHelper
         };
     }
 
-    public static string FormatToString(Class clazz)
+    public static string FormatToString(Class clazz, bool constantPool = true)
     {
         var helper = clazz.GetConstantPoolHelper();
         var builder = new StringBuilder();
@@ -55,15 +55,30 @@ public class ClassStringHelper
         builder.AppendLine($"[@] Access Flags: {ClassAccessFlagsHelper.GetFlagsString((ushort)clazz.AccessFlags)}");
         builder.AppendLine($"[@] This Class: {clazz.ThisClass}");
         builder.AppendLine($"[@] Super Class: {clazz.SuperClass}");
-        
-        if (clazz.ConstantPool.Count != 0)
-        {
-            builder.AppendLine($"[@] Constant Pool: ");
-        }
 
-        foreach (var cpi in clazz.ConstantPool)
+        if (constantPool)
         {
-            builder.AppendLine($"[@] - Constant: {FormatConstantPoolItem(cpi)}");
+            if (clazz.ConstantPool.Count != 0)
+            {
+                builder.AppendLine($"[@] Constant Pool: ");
+            }
+
+            ushort currentCount = 0;
+            ushort currentIndex = 1;
+            foreach (var cpi in clazz.ConstantPool)
+            {
+                builder.AppendLine($"[@] - Constant [{currentIndex:D5}]: {FormatConstantPoolItem(cpi)}");
+                if (cpi.Tag == ConstantPoolTag.Long || cpi.Tag == ConstantPoolTag.Double)
+                {
+                    currentIndex += 2;
+                }
+                else
+                {
+                    currentIndex += 1;
+                }
+
+                currentCount++;
+            }
         }
         
         

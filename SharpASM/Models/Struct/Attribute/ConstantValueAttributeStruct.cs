@@ -41,4 +41,17 @@ public class ConstantValueAttributeStruct : IAttributeStruct
             Info = infoBytes
         };
     }
+
+    public static ConstantValueAttributeStruct FromStructInfo(AttributeInfoStruct info)
+    {
+        int offset = 0;
+        byte[] bytes = info.Info;
+    
+        return new ConstantValueAttributeStruct
+        {
+            AttributeNameIndex = info.AttributeNameIndex,
+            AttributeLength = info.AttributeLength,
+            ConstantValueIndex = ByteUtils.ReadUInt16(bytes, ref offset)
+        };
+    }
 }

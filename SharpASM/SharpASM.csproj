@@ -22,7 +22,8 @@
 
     <ItemGroup>
       <Folder Include="Converters\" />
-      <Folder Include="Core\" />
+      <Folder Include="Core\Class\" />
+      <Folder Include="Core\Struct\" />
     </ItemGroup>
 
 </Project>

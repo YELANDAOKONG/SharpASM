@@ -5,6 +5,7 @@ using SharpASM.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using SharpASM.Analysis.Executor.Models;
 
 namespace SharpASM.Analysis;
 
@@ -431,23 +432,5 @@ public class StackMapTableRebuilder
     private void HandlePopInstruction(Code code, FrameState state)
     {
         // 实现弹出指令的处理逻辑
-    }
-}
-    
-/// <summary>
-/// 表示帧状态（局部变量和操作数栈的类型信息）
-/// </summary>
-public class FrameState
-{
-    public VerificationTypeInfoStruct[] Locals { get; set; }
-    public VerificationTypeInfoStruct[] Stack { get; set; }
-        
-    public FrameState Clone()
-    {
-        return new FrameState
-        {
-            Locals = (VerificationTypeInfoStruct[])Locals.Clone(),
-            Stack = (VerificationTypeInfoStruct[])Stack.Clone()
-        };
     }
 }

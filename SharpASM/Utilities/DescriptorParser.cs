@@ -5,15 +5,15 @@ using System.Text;
 namespace SharpASM.Utilities;
 
 /// <summary>
-/// Java 类型描述符解析工具
+/// Java Type Descriptor Parsing Utility
 /// </summary>
 public static class DescriptorParser
 {
     /// <summary>
-    /// 解析字段描述符
+    /// Parses a field descriptor
     /// </summary>
-    /// <param name="descriptor">字段描述符</param>
-    /// <returns>解析后的类型信息</returns>
+    /// <param name="descriptor">Field descriptor string</param>
+    /// <returns>Parsed type information</returns>
     public static FieldTypeInfo ParseFieldDescriptor(string descriptor)
     {
         if (string.IsNullOrEmpty(descriptor))
@@ -29,10 +29,10 @@ public static class DescriptorParser
     }
 
     /// <summary>
-    /// 解析方法描述符
+    /// Parses a method descriptor
     /// </summary>
-    /// <param name="descriptor">方法描述符</param>
-    /// <returns>包含参数类型和返回类型的信息</returns>
+    /// <param name="descriptor">Method descriptor string</param>
+    /// <returns>Information containing parameter types and return type</returns>
     public static MethodTypeInfo ParseMethodDescriptor(string descriptor)
     {
         if (string.IsNullOrEmpty(descriptor))
@@ -40,26 +40,26 @@ public static class DescriptorParser
 
         int index = 0;
             
-        // 方法描述符必须以 '(' 开头
+        // Method descriptor must start with '('
         if (descriptor[index] != '(')
             throw new ArgumentException($"Method descriptor must start with '(', got: '{descriptor}'");
             
-        index++; // 跳过 '('
+        index++; // Skip '('
             
-        // 解析参数类型
+        // Parse parameter types
         var parameters = new List<FieldTypeInfo>();
         while (index < descriptor.Length && descriptor[index] != ')')
         {
             parameters.Add(ParseFieldType(descriptor, ref index));
         }
             
-        // 方法描述符必须以 ')' 结尾
+        // Method descriptor must end with ')'
         if (index >= descriptor.Length || descriptor[index] != ')')
             throw new ArgumentException($"Method descriptor must end with ')', got: '{descriptor}'");
             
-        index++; // 跳过 ')'
+        index++; // Skip ')'
             
-        // 解析返回类型
+        // Parse return type
         var returnType = index < descriptor.Length ? ParseFieldType(descriptor, ref index) : null;
             
         if (index != descriptor.Length)
@@ -73,7 +73,7 @@ public static class DescriptorParser
     }
 
     /// <summary>
-    /// 解析字段类型
+    /// Parses a field type from the descriptor
     /// </summary>
     private static FieldTypeInfo ParseFieldType(string descriptor, ref int index)
     {
@@ -82,7 +82,7 @@ public static class DescriptorParser
             
         char c = descriptor[index];
             
-        // 基本类型
+        // Primitive types
         if (c == 'B') { index++; return new FieldTypeInfo { Type = "byte", Descriptor = "B", IsPrimitive = true, ArrayDimensions = 0 }; }
         if (c == 'C') { index++; return new FieldTypeInfo { Type = "char", Descriptor = "C", IsPrimitive = true, ArrayDimensions = 0 }; }
         if (c == 'D') { index++; return new FieldTypeInfo { Type = "double", Descriptor = "D", IsPrimitive = true, ArrayDimensions = 0 }; }
@@ -93,7 +93,7 @@ public static class DescriptorParser
         if (c == 'Z') { index++; return new FieldTypeInfo { Type = "boolean", Descriptor = "Z", IsPrimitive = true, ArrayDimensions = 0 }; }
         if (c == 'V') { index++; return new FieldTypeInfo { Type = "void", Descriptor = "V", IsPrimitive = true, ArrayDimensions = 0 }; }
             
-        // 数组类型
+        // Array types
         if (c == '[')
         {
             int dimensions = 0;
@@ -115,19 +115,19 @@ public static class DescriptorParser
             };
         }
             
-        // 对象类型
+        // Object types
         if (c == 'L')
         {
             int start = index;
-            index++; // 跳过 'L'
+            index++; // Skip 'L'
                 
-            // 找到分号
+            // Find semicolon
             int end = descriptor.IndexOf(';', index);
             if (end == -1)
                 throw new ArgumentException($"Unterminated object descriptor in: '{descriptor}'");
                 
             string className = descriptor.Substring(index, end - index);
-            index = end + 1; // 跳过 ';'
+            index = end + 1; // Skip ';'
                 
             return new FieldTypeInfo
             {
@@ -142,7 +142,7 @@ public static class DescriptorParser
     }
         
     /// <summary>
-    /// 将类型描述符转换为可读名称
+    /// Converts a type descriptor to a human-readable name
     /// </summary>
     public static string DescriptorToReadableName(string descriptor)
     {
@@ -151,23 +151,23 @@ public static class DescriptorParser
     }
         
     /// <summary>
-    /// 将类型信息转换为可读名称
+    /// Converts type information to a human-readable name
     /// </summary>
     public static string TypeInfoToReadableName(FieldTypeInfo typeInfo)
     {
         var sb = new StringBuilder();
             
-        // 添加数组维度
+        // Add array dimensions
         for (int i = 0; i < typeInfo.ArrayDimensions; i++)
         {
             sb.Append("[]");
         }
             
-        // 添加类型名称
+        // Add type name
         string typeName = typeInfo.Type;
         if (sb.Length > 0)
         {
-            // 如果是数组，将类型名称放在前面
+            // For arrays, place type name first
             typeName = typeName + sb.ToString();
             sb.Clear();
             sb.Append(typeName);
@@ -181,7 +181,7 @@ public static class DescriptorParser
     }
         
     /// <summary>
-    /// 将方法描述符转换为可读签名
+    /// Converts a method descriptor to a human-readable signature
     /// </summary>
     public static string MethodDescriptorToReadableSignature(string descriptor)
     {
@@ -190,13 +190,13 @@ public static class DescriptorParser
     }
         
     /// <summary>
-    /// 将方法信息转换为可读签名
+    /// Converts method information to a human-readable signature
     /// </summary>
     public static string MethodInfoToReadableSignature(MethodTypeInfo methodInfo)
     {
         var sb = new StringBuilder();
             
-        // 参数列表
+        // Parameter list
         sb.Append("(");
         for (int i = 0; i < methodInfo.Parameters.Count; i++)
         {
@@ -205,7 +205,7 @@ public static class DescriptorParser
         }
         sb.Append(")");
             
-        // 返回类型
+        // Return type
         if (methodInfo.ReturnType != null)
         {
             sb.Append(" : ");
@@ -217,37 +217,37 @@ public static class DescriptorParser
     
     
     /// <summary>
-    /// 字段类型信息
+    /// Field type information
     /// </summary>
     public class FieldTypeInfo
     {
         /// <summary>
-        /// 类型名称（已转换为点分格式，如 java.lang.String）
+        /// Type name (converted to dot notation, e.g., java.lang.String)
         /// </summary>
         public string Type { get; set; } = String.Empty;
         
         /// <summary>
-        /// 原始描述符（如 Ljava/lang/String;）
+        /// Original descriptor (e.g., Ljava/lang/String;)
         /// </summary>
         public string Descriptor { get; set; } = String.Empty;
         
         /// <summary>
-        /// 是否为基本类型
+        /// Whether the type is a primitive
         /// </summary>
         public bool IsPrimitive { get; set; }
         
         /// <summary>
-        /// 数组维度（0表示不是数组）
+        /// Array dimensions (0 indicates not an array)
         /// </summary>
         public int ArrayDimensions { get; set; }
         
         /// <summary>
-        /// 数组元素类型（如果是数组）
+        /// Array element type (if applicable)
         /// </summary>
         public FieldTypeInfo? ComponentType { get; set; }
         
         /// <summary>
-        /// 转换为可读字符串
+        /// Converts to a human-readable string
         /// </summary>
         public override string ToString()
         {
@@ -256,22 +256,22 @@ public static class DescriptorParser
     }
 
     /// <summary>
-    /// 方法类型信息
+    /// Method type information
     /// </summary>
     public class MethodTypeInfo
     {
         /// <summary>
-        /// 参数类型列表
+        /// List of parameter types
         /// </summary>
         public List<FieldTypeInfo> Parameters { get; set; } = new List<FieldTypeInfo>();
         
         /// <summary>
-        /// 返回类型（void方法返回null）
+        /// Return type (null for void methods)
         /// </summary>
         public FieldTypeInfo? ReturnType { get; set; }
         
         /// <summary>
-        /// 转换为可读字符串
+        /// Converts to a human-readable string
         /// </summary>
         public override string ToString()
         {

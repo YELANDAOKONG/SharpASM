@@ -23,7 +23,6 @@
     <ItemGroup>
       <Folder Include="Converters\" />
       <Folder Include="Core\" />
-      <Folder Include="Models\Attributes\" />
     </ItemGroup>
 
 </Project>

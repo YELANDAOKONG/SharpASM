@@ -69,90 +69,90 @@
 [@] This Class: MainPlus
 [@] Super Class: java/lang/Object
 [@] Constant Pool: 
-[@] - Constant: (Methodref) #2.#3
-[@] - Constant: (Class) #4
-[@] - Constant: (NameAndType) #5:#6
-[@] - Constant: (Utf8) "java/lang/Object"
-[@] - Constant: (Utf8) "<init>"
-[@] - Constant: (Utf8) "()V"
-[@] - Constant: (Fieldref) #8.#9
-[@] - Constant: (Class) #10
-[@] - Constant: (NameAndType) #11:#12
-[@] - Constant: (Utf8) "java/lang/System"
-[@] - Constant: (Utf8) "out"
-[@] - Constant: (Utf8) "Ljava/io/PrintStream;"
-[@] - Constant: (String) #14
-[@] - Constant: (Utf8) "Hello and welcome! "
-[@] - Constant: (Methodref) #16.#17
-[@] - Constant: (Class) #18
-[@] - Constant: (NameAndType) #19:#20
-[@] - Constant: (Utf8) "java/io/PrintStream"
-[@] - Constant: (Utf8) "println"
-[@] - Constant: (Utf8) "(Ljava/lang/String;)V"
-[@] - Constant: (InvokeDynamic) #0.#22
-[@] - Constant: (NameAndType) #23:#24
-[@] - Constant: (Utf8) "makeConcatWithConstants"
-[@] - Constant: (Utf8) "(I)Ljava/lang/String;"
-[@] - Constant: (Integer) 123456
-[@] - Constant: (Fieldref) #27.#28
-[@] - Constant: (Class) #29
-[@] - Constant: (NameAndType) #30:#31
-[@] - Constant: (Utf8) "MainPlus"
-[@] - Constant: (Utf8) "Int"
-[@] - Constant: (Utf8) "I"
-[@] - Constant: (Long) 123456789L
-[@] - Constant: (Fieldref) #27.#35
-[@] - Constant: (NameAndType) #36:#37
-[@] - Constant: (Utf8) "Long"
-[@] - Constant: (Utf8) "J"
-[@] - Constant: (Float) 123.456
-[@] - Constant: (Fieldref) #27.#40
-[@] - Constant: (NameAndType) #41:#42
-[@] - Constant: (Utf8) "Float"
-[@] - Constant: (Utf8) "F"
-[@] - Constant: (Double) 123.456789D
-[@] - Constant: (Fieldref) #27.#46
-[@] - Constant: (NameAndType) #47:#48
-[@] - Constant: (Utf8) "Double"
-[@] - Constant: (Utf8) "D"
-[@] - Constant: (Utf8) "IntFinal"
-[@] - Constant: (Utf8) "ConstantValue"
-[@] - Constant: (Utf8) "LongFinal"
-[@] - Constant: (Utf8) "FloatFinal"
-[@] - Constant: (Utf8) "DoubleFinal"
-[@] - Constant: (Utf8) "StringFinal"
-[@] - Constant: (Utf8) "Ljava/lang/String;"
-[@] - Constant: (String) #57
-[@] - Constant: (Utf8) "Hello, World! "
-[@] - Constant: (Utf8) "Code"
-[@] - Constant: (Utf8) "LineNumberTable"
-[@] - Constant: (Utf8) "LocalVariableTable"
-[@] - Constant: (Utf8) "this"
-[@] - Constant: (Utf8) "LMainPlus;"
-[@] - Constant: (Utf8) "main"
-[@] - Constant: (Utf8) "([Ljava/lang/String;)V"
-[@] - Constant: (Utf8) "i"
-[@] - Constant: (Utf8) "args"
-[@] - Constant: (Utf8) "[Ljava/lang/String;"
-[@] - Constant: (Utf8) "StackMapTable"
-[@] - Constant: (Utf8) "<clinit>"
-[@] - Constant: (Utf8) "SourceFile"
-[@] - Constant: (Utf8) "MainPlus.java"
-[@] - Constant: (Utf8) "BootstrapMethods"
-[@] - Constant: (String) #74
-[@] - Constant: (Utf8) "i = "
-[@] - Constant: (MethodHandle) 6.#76
-[@] - Constant: (Methodref) #77.#78
-[@] - Constant: (Class) #79
-[@] - Constant: (NameAndType) #23:#80
-[@] - Constant: (Utf8) "java/lang/invoke/StringConcatFactory"
-[@] - Constant: (Utf8) "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;"
-[@] - Constant: (Utf8) "InnerClasses"
-[@] - Constant: (Class) #83
-[@] - Constant: (Utf8) "java/lang/invoke/MethodHandles$Lookup"
-[@] - Constant: (Class) #85
-[@] - Constant: (Utf8) "java/lang/invoke/MethodHandles"
-[@] - Constant: (Utf8) "Lookup"
+[@] - Constant [00001]: (Methodref) #2.#3
+[@] - Constant [00002]: (Class) #4
+[@] - Constant [00003]: (NameAndType) #5:#6
+[@] - Constant [00004]: (Utf8) "java/lang/Object"
+[@] - Constant [00005]: (Utf8) "<init>"
+[@] - Constant [00006]: (Utf8) "()V"
+[@] - Constant [00007]: (Fieldref) #8.#9
+[@] - Constant [00008]: (Class) #10
+[@] - Constant [00009]: (NameAndType) #11:#12
+[@] - Constant [00010]: (Utf8) "java/lang/System"
+[@] - Constant [00011]: (Utf8) "out"
+[@] - Constant [00012]: (Utf8) "Ljava/io/PrintStream;"
+[@] - Constant [00013]: (String) #14
+[@] - Constant [00014]: (Utf8) "Hello and welcome! "
+[@] - Constant [00015]: (Methodref) #16.#17
+[@] - Constant [00016]: (Class) #18
+[@] - Constant [00017]: (NameAndType) #19:#20
+[@] - Constant [00018]: (Utf8) "java/io/PrintStream"
+[@] - Constant [00019]: (Utf8) "println"
+[@] - Constant [00020]: (Utf8) "(Ljava/lang/String;)V"
+[@] - Constant [00021]: (InvokeDynamic) #0.#22
+[@] - Constant [00022]: (NameAndType) #23:#24
+[@] - Constant [00023]: (Utf8) "makeConcatWithConstants"
+[@] - Constant [00024]: (Utf8) "(I)Ljava/lang/String;"
+[@] - Constant [00025]: (Integer) 123456
+[@] - Constant [00026]: (Fieldref) #27.#28
+[@] - Constant [00027]: (Class) #29
+[@] - Constant [00028]: (NameAndType) #30:#31
+[@] - Constant [00029]: (Utf8) "MainPlus"
+[@] - Constant [00030]: (Utf8) "Int"
+[@] - Constant [00031]: (Utf8) "I"
+[@] - Constant [00032]: (Long) 123456789L
+[@] - Constant [00034]: (Fieldref) #27.#35
+[@] - Constant [00035]: (NameAndType) #36:#37
+[@] - Constant [00036]: (Utf8) "Long"
+[@] - Constant [00037]: (Utf8) "J"
+[@] - Constant [00038]: (Float) 123.456
+[@] - Constant [00039]: (Fieldref) #27.#40
+[@] - Constant [00040]: (NameAndType) #41:#42
+[@] - Constant [00041]: (Utf8) "Float"
+[@] - Constant [00042]: (Utf8) "F"
+[@] - Constant [00043]: (Double) 123.456789D
+[@] - Constant [00045]: (Fieldref) #27.#46
+[@] - Constant [00046]: (NameAndType) #47:#48
+[@] - Constant [00047]: (Utf8) "Double"
+[@] - Constant [00048]: (Utf8) "D"
+[@] - Constant [00049]: (Utf8) "IntFinal"
+[@] - Constant [00050]: (Utf8) "ConstantValue"
+[@] - Constant [00051]: (Utf8) "LongFinal"
+[@] - Constant [00052]: (Utf8) "FloatFinal"
+[@] - Constant [00053]: (Utf8) "DoubleFinal"
+[@] - Constant [00054]: (Utf8) "StringFinal"
+[@] - Constant [00055]: (Utf8) "Ljava/lang/String;"
+[@] - Constant [00056]: (String) #57
+[@] - Constant [00057]: (Utf8) "Hello, World! "
+[@] - Constant [00058]: (Utf8) "Code"
+[@] - Constant [00059]: (Utf8) "LineNumberTable"
+[@] - Constant [00060]: (Utf8) "LocalVariableTable"
+[@] - Constant [00061]: (Utf8) "this"
+[@] - Constant [00062]: (Utf8) "LMainPlus;"
+[@] - Constant [00063]: (Utf8) "main"
+[@] - Constant [00064]: (Utf8) "([Ljava/lang/String;)V"
+[@] - Constant [00065]: (Utf8) "i"
+[@] - Constant [00066]: (Utf8) "args"
+[@] - Constant [00067]: (Utf8) "[Ljava/lang/String;"
+[@] - Constant [00068]: (Utf8) "StackMapTable"
+[@] - Constant [00069]: (Utf8) "<clinit>"
+[@] - Constant [00070]: (Utf8) "SourceFile"
+[@] - Constant [00071]: (Utf8) "MainPlus.java"
+[@] - Constant [00072]: (Utf8) "BootstrapMethods"
+[@] - Constant [00073]: (String) #74
+[@] - Constant [00074]: (Utf8) "i = "
+[@] - Constant [00075]: (MethodHandle) 6.#76
+[@] - Constant [00076]: (Methodref) #77.#78
+[@] - Constant [00077]: (Class) #79
+[@] - Constant [00078]: (NameAndType) #23:#80
+[@] - Constant [00079]: (Utf8) "java/lang/invoke/StringConcatFactory"
+[@] - Constant [00080]: (Utf8) "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;"
+[@] - Constant [00081]: (Utf8) "InnerClasses"
+[@] - Constant [00082]: (Class) #83
+[@] - Constant [00083]: (Utf8) "java/lang/invoke/MethodHandles$Lookup"
+[@] - Constant [00084]: (Class) #85
+[@] - Constant [00085]: (Utf8) "java/lang/invoke/MethodHandles"
+[@] - Constant [00086]: (Utf8) "Lookup"
 [@] Attributes: 
 [@] - Attribute: SourceFile (2 Bytes)
 [@] - Attribute: BootstrapMethods (8 Bytes)

@@ -1,4 +1,6 @@
+using SharpASM.Analysis;
 using SharpASM.Models.Code;
+using SharpASM.Models.Struct.Attribute;
 
 namespace SharpASM.Utilities;
 
@@ -33,6 +35,25 @@ public static class ByteCodeInserter
             
         return newCodes;
     }
+    
+    /// <summary>
+    /// 在指定位置插入字节码并更新 StackMapTable
+    /// </summary>
+    public static (List<Code>, StackMapTableAttributeStruct) InsertCodesWithStackMap(
+        List<Code> originalCodes, 
+        int insertIndex, 
+        List<Code> codesToInsert,
+        StackMapTableAttributeStruct? originalStackMap = null)
+    {
+        // 插入代码
+        var newCodes = InsertCodes(originalCodes, insertIndex, codesToInsert);
+            
+        // 重新构建 StackMapTable
+        var rebuilder = new StackMapTableRebuilder(newCodes);
+        var newStackMap = rebuilder.Rebuild();
+            
+        return (newCodes, newStackMap);
+    }
         
     /// <summary>
     /// 删除指定位置的字节码并自动调整偏移量
@@ -62,6 +83,25 @@ public static class ByteCodeInserter
         AdjustBranchOffsets(newCodes, removeIndex, -removeLength, false);
             
         return newCodes;
+    }
+    
+    /// <summary>
+    /// 删除指定位置的字节码并更新 StackMapTable
+    /// </summary>
+    public static (List<Code>, StackMapTableAttributeStruct) RemoveCodesWithStackMap(
+        List<Code> originalCodes, 
+        int removeIndex, 
+        int removeCount,
+        StackMapTableAttributeStruct? originalStackMap = null)
+    {
+        // 删除代码
+        var newCodes = RemoveCodes(originalCodes, removeIndex, removeCount);
+            
+        // 重新构建 StackMapTable
+        var rebuilder = new StackMapTableRebuilder(newCodes);
+        var newStackMap = rebuilder.Rebuild();
+            
+        return (newCodes, newStackMap);
     }
         
     /// <summary>

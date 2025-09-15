@@ -644,17 +644,27 @@ public class CodeExecutor
                 // No operation
                 break;
                 
-            case OperationCode.LCONST_0:
+            case OperationCode.ACONST_NULL:
                 newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
                 {
-                    LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
-                });
-                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-                {
-                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                    NullVariableInfo = new NullVariableInfoStruct { Tag = 5 }
                 });
                 break;
                 
+            case OperationCode.ICONST_M1:
+            case OperationCode.ICONST_0:
+            case OperationCode.ICONST_1:
+            case OperationCode.ICONST_2:
+            case OperationCode.ICONST_3:
+            case OperationCode.ICONST_4:
+            case OperationCode.ICONST_5:
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+                
+            case OperationCode.LCONST_0:
             case OperationCode.LCONST_1:
                 newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
                 {
@@ -667,19 +677,7 @@ public class CodeExecutor
                 break;
                 
             case OperationCode.FCONST_0:
-                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-                {
-                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
-                });
-                break;
-                
             case OperationCode.FCONST_1:
-                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-                {
-                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
-                });
-                break;
-                
             case OperationCode.FCONST_2:
                 newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
                 {
@@ -688,16 +686,6 @@ public class CodeExecutor
                 break;
                 
             case OperationCode.DCONST_0:
-                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-                {
-                    DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
-                });
-                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-                {
-                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
-                });
-                break;
-                
             case OperationCode.DCONST_1:
                 newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
                 {
@@ -709,6 +697,14 @@ public class CodeExecutor
                 });
                 break;
                 
+            case OperationCode.BIPUSH:
+            case OperationCode.SIPUSH:
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+                
             case OperationCode.LDC:
             case OperationCode.LDC_W:
             case OperationCode.LDC2_W:
@@ -716,27 +712,63 @@ public class CodeExecutor
                 break;
 
             // Loads
+            case OperationCode.ILOAD:
             case OperationCode.ILOAD_0:
             case OperationCode.ILOAD_1:
             case OperationCode.ILOAD_2:
             case OperationCode.ILOAD_3:
+                SimulateLoad(ref newState, instruction, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+                
+            case OperationCode.LLOAD:
             case OperationCode.LLOAD_0:
             case OperationCode.LLOAD_1:
             case OperationCode.LLOAD_2:
             case OperationCode.LLOAD_3:
+                SimulateLoad(ref newState, instruction, new VerificationTypeInfoStruct
+                {
+                    LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
+                });
+                break;
+                
+            case OperationCode.FLOAD:
             case OperationCode.FLOAD_0:
             case OperationCode.FLOAD_1:
             case OperationCode.FLOAD_2:
             case OperationCode.FLOAD_3:
+                SimulateLoad(ref newState, instruction, new VerificationTypeInfoStruct
+                {
+                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+                });
+                break;
+                
+            case OperationCode.DLOAD:
             case OperationCode.DLOAD_0:
             case OperationCode.DLOAD_1:
             case OperationCode.DLOAD_2:
             case OperationCode.DLOAD_3:
+                SimulateLoad(ref newState, instruction, new VerificationTypeInfoStruct
+                {
+                    DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
+                });
+                break;
+                
+            case OperationCode.ALOAD:
             case OperationCode.ALOAD_0:
             case OperationCode.ALOAD_1:
             case OperationCode.ALOAD_2:
             case OperationCode.ALOAD_3:
-                SimulateLoad(ref newState, instruction);
+                SimulateLoad(ref newState, instruction, new VerificationTypeInfoStruct
+                {
+                    ObjectVariableInfo = new ObjectVariableInfoStruct
+                    {
+                        Tag = 7,
+                        CPoolIndex = FindClassConstantIndex("java/lang/Object")
+                    }
+                });
                 break;
                 
             case OperationCode.IALOAD:
@@ -802,27 +834,44 @@ public class CodeExecutor
                 break;
 
             // Stores
+            case OperationCode.ISTORE:
             case OperationCode.ISTORE_0:
             case OperationCode.ISTORE_1:
             case OperationCode.ISTORE_2:
             case OperationCode.ISTORE_3:
+                SimulateStore(ref newState, instruction, 1);
+                break;
+                
+            case OperationCode.LSTORE:
             case OperationCode.LSTORE_0:
             case OperationCode.LSTORE_1:
             case OperationCode.LSTORE_2:
             case OperationCode.LSTORE_3:
+                SimulateStore(ref newState, instruction, 2);
+                break;
+                
+            case OperationCode.FSTORE:
             case OperationCode.FSTORE_0:
             case OperationCode.FSTORE_1:
             case OperationCode.FSTORE_2:
             case OperationCode.FSTORE_3:
+                SimulateStore(ref newState, instruction, 1);
+                break;
+                
+            case OperationCode.DSTORE:
             case OperationCode.DSTORE_0:
             case OperationCode.DSTORE_1:
             case OperationCode.DSTORE_2:
             case OperationCode.DSTORE_3:
+                SimulateStore(ref newState, instruction, 2);
+                break;
+                
+            case OperationCode.ASTORE:
             case OperationCode.ASTORE_0:
             case OperationCode.ASTORE_1:
             case OperationCode.ASTORE_2:
             case OperationCode.ASTORE_3:
-                SimulateStore(ref newState, instruction);
+                SimulateStore(ref newState, instruction, 1);
                 break;
                 
             case OperationCode.IASTORE:
@@ -852,6 +901,18 @@ public class CodeExecutor
                 break;
 
             // Stack
+            case OperationCode.POP:
+                newState.Stack = Pop(newState.Stack, 1);
+                break;
+                
+            case OperationCode.POP2:
+                newState.Stack = Pop(newState.Stack, 2);
+                break;
+                
+            case OperationCode.DUP:
+                SimulateDup(ref newState);
+                break;
+                
             case OperationCode.DUP_X1:
                 SimulateDupX1(ref newState);
                 break;
@@ -877,6 +938,7 @@ public class CodeExecutor
                 break;
 
             // Math
+            case OperationCode.IADD:
             case OperationCode.ISUB:
             case OperationCode.IMUL:
             case OperationCode.IDIV:
@@ -895,6 +957,7 @@ public class CodeExecutor
                 });
                 break;
                 
+            case OperationCode.LADD:
             case OperationCode.LSUB:
             case OperationCode.LMUL:
             case OperationCode.LDIV:
@@ -917,6 +980,7 @@ public class CodeExecutor
                 });
                 break;
                 
+            case OperationCode.FADD:
             case OperationCode.FSUB:
             case OperationCode.FMUL:
             case OperationCode.FDIV:
@@ -929,6 +993,7 @@ public class CodeExecutor
                 });
                 break;
                 
+            case OperationCode.DADD:
             case OperationCode.DSUB:
             case OperationCode.DMUL:
             case OperationCode.DDIV:
@@ -944,8 +1009,52 @@ public class CodeExecutor
                     TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
                 });
                 break;
+                
+            case OperationCode.IINC:
+                // IINC doesn't affect the stack
+                break;
 
             // Conversions
+            case OperationCode.I2L:
+                newState.Stack = Pop(newState.Stack, 1);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case OperationCode.I2F:
+                newState.Stack = Pop(newState.Stack, 1);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+                });
+                break;
+                
+            case OperationCode.I2D:
+                newState.Stack = Pop(newState.Stack, 1);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case OperationCode.L2I:
+                newState.Stack = Pop(newState.Stack, 2);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+                
             case OperationCode.L2F:
                 newState.Stack = Pop(newState.Stack, 2);
                 newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
@@ -963,6 +1072,14 @@ public class CodeExecutor
                 newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
                 {
                     TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case OperationCode.F2I:
+                newState.Stack = Pop(newState.Stack, 1);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
                 });
                 break;
                 
@@ -990,11 +1107,11 @@ public class CodeExecutor
                 });
                 break;
                 
-            case OperationCode.D2F:
+            case OperationCode.D2I:
                 newState.Stack = Pop(newState.Stack, 2);
                 newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
                 {
-                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
                 });
                 break;
                 
@@ -1007,6 +1124,14 @@ public class CodeExecutor
                 newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
                 {
                     TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case OperationCode.D2F:
+                newState.Stack = Pop(newState.Stack, 2);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
                 });
                 break;
                 
@@ -1102,18 +1227,99 @@ public class CodeExecutor
             case OperationCode.ARETURN:
                 newState.Stack = Pop(newState.Stack, 1);
                 break;
+                
+            case OperationCode.RETURN:
+                // No stack effect
+                break;
 
             // References
+            case OperationCode.GETSTATIC:
+                SimulateGetStatic(ref newState, instruction);
+                break;
+                
             case OperationCode.PUTSTATIC:
-                newState.Stack = Pop(newState.Stack, 1); // Pop value
+                SimulatePutStatic(ref newState, instruction);
+                break;
+                
+            case OperationCode.GETFIELD:
+                SimulateGetField(ref newState, instruction);
+                break;
+                
+            case OperationCode.PUTFIELD:
+                SimulatePutField(ref newState, instruction);
+                break;
+                
+            case OperationCode.INVOKEVIRTUAL:
+            case OperationCode.INVOKESPECIAL:
+            case OperationCode.INVOKESTATIC:
+            case OperationCode.INVOKEINTERFACE:
+                SimulateInvoke(ref newState, instruction);
                 break;
                 
             case OperationCode.INVOKEDYNAMIC:
-                SimulateInvoke(ref newState, instruction);
+                SimulateInvokeDynamic(ref newState, instruction);
                 break;
-            
-            case OperationCode.INVOKEVIRTUAL:
-                SimulateInvoke(ref newState, instruction);
+                
+            case OperationCode.NEW:
+                SimulateNew(ref newState, instruction);
+                break;
+                
+            case OperationCode.NEWARRAY:
+                newState.Stack = Pop(newState.Stack, 1); // Pop array size
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    ObjectVariableInfo = new ObjectVariableInfoStruct
+                    {
+                        Tag = 7,
+                        CPoolIndex = FindClassConstantIndex("java/lang/Object")
+                    }
+                });
+                break;
+                
+            case OperationCode.ANEWARRAY:
+                newState.Stack = Pop(newState.Stack, 1); // Pop array size
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    ObjectVariableInfo = new ObjectVariableInfoStruct
+                    {
+                        Tag = 7,
+                        CPoolIndex = GetClassIndex(instruction)
+                    }
+                });
+                break;
+                
+            case OperationCode.ARRAYLENGTH:
+                newState.Stack = Pop(newState.Stack, 1); // Pop array reference
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+                
+            case OperationCode.ATHROW:
+                newState.Stack = Pop(newState.Stack, 1); // Pop exception object
+                break;
+                
+            case OperationCode.CHECKCAST:
+                // CHECKCAST doesn't change the stack, just verifies the type
+                break;
+                
+            case OperationCode.INSTANCEOF:
+                newState.Stack = Pop(newState.Stack, 1); // Pop object reference
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+                
+            case OperationCode.MONITORENTER:
+            case OperationCode.MONITOREXIT:
+                newState.Stack = Pop(newState.Stack, 1); // Pop object reference
+                break;
+
+            // Extended
+            case OperationCode.WIDE:
+                // WIDE prefix - handled separately in instruction decoding
                 break;
                 
             case OperationCode.MULTIANEWARRAY:
@@ -1127,18 +1333,6 @@ public class CodeExecutor
                         CPoolIndex = GetClassIndex(instruction)
                     }
                 });
-                break;
-                
-            case OperationCode.MONITORENTER:
-            case OperationCode.MONITOREXIT:
-                newState.Stack = Pop(newState.Stack, 1); // Pop object reference
-                break;
-            
-            
-
-            // Extended
-            case OperationCode.WIDE:
-                // WIDE prefix - handled separately in instruction decoding
                 break;
                 
             default:
@@ -1226,6 +1420,200 @@ public class CodeExecutor
         }
         return 0;
     }
+    
+    private void SimulateGetStatic(ref FrameState state, Code instruction)
+    {
+        // 获取字段引用索引
+        ushort fieldRefIndex = GetFieldRefIndex(instruction);
+    
+        // 从常量池获取字段类型
+        var fieldType = GetFieldType(fieldRefIndex);
+        var verificationType = ConvertDescriptorToVerificationType(fieldType);
+    
+        // 将字段值推入栈
+        state.Stack = Push(state.Stack, verificationType);
+    
+        // 对于 Long 和 Double 类型，需要额外的栈槽
+        if (fieldType.Descriptor == "J" || fieldType.Descriptor == "D")
+        {
+            state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+            {
+                TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+            });
+        }
+    }
+    
+    private void SimulatePutStatic(ref FrameState state, Code instruction)
+    {
+        // 获取字段引用索引
+        ushort fieldRefIndex = GetFieldRefIndex(instruction);
+        
+        // 从常量池获取字段类型
+        var fieldType = GetFieldType(fieldRefIndex);
+        
+        // 弹出字段值
+        if (fieldType.Descriptor == "J" || fieldType.Descriptor == "D")
+        {
+            state.Stack = Pop(state.Stack, 2);
+        }
+        else
+        {
+            state.Stack = Pop(state.Stack, 1);
+        }
+    }
+    
+    
+    private void SimulateInvokeDynamic(ref FrameState state, Code instruction)
+    {
+        // 获取调用点索引
+        ushort invokeDynamicIndex = GetInvokeDynamicIndex(instruction);
+        
+        // 从常量池获取方法描述符
+        var methodDescriptor = GetInvokeDynamicDescriptor(invokeDynamicIndex);
+        var descriptorInfo = DescriptorParser.ParseMethodDescriptor(methodDescriptor);
+        
+        // 弹出参数
+        int popCount = descriptorInfo.Parameters.Count;
+        state.Stack = Pop(state.Stack, popCount);
+        
+        // 如果有返回值，推入栈
+        if (descriptorInfo.ReturnType != null && descriptorInfo.ReturnType.Descriptor != "V")
+        {
+            var returnType = ConvertDescriptorToVerificationType(descriptorInfo.ReturnType);
+            state.Stack = Push(state.Stack, returnType);
+            
+            // 对于 long 和 double 类型，需要额外的栈槽
+            if (descriptorInfo.ReturnType.Descriptor == "J" || 
+                descriptorInfo.ReturnType.Descriptor == "D")
+            {
+                state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+            }
+        }
+    }
+    
+    private ushort GetFieldRefIndex(Code instruction)
+    {
+        if (instruction.Operands.Count > 0)
+        {
+            byte[] data = instruction.Operands[0].Data;
+            if (data.Length == 2)
+            {
+                return (ushort)((data[0] << 8) | data[1]);
+            }
+        }
+        return 0;
+    }
+
+    private DescriptorParser.FieldTypeInfo GetFieldType(ushort fieldRefIndex)
+    {
+        // 从常量池获取字段描述符
+        var fieldRefInfo = Helper.ByIndex(fieldRefIndex);
+        if (fieldRefInfo == null)
+        {
+            throw new ArgumentException($"Field ref not found at index {fieldRefIndex}");
+        }
+        
+        var fieldRefStruct = fieldRefInfo.ToStruct().ToConstantStruct() as ConstantFieldrefInfoStruct;
+        if (fieldRefStruct == null)
+        {
+            throw new ArgumentException($"Constant at index {fieldRefIndex} is not a field reference");
+        }
+        
+        ushort nameAndTypeIndex = fieldRefStruct.NameAndTypeIndex;
+        
+        var nameAndTypeInfo = Helper.ByIndex(nameAndTypeIndex);
+        if (nameAndTypeInfo == null)
+        {
+            throw new ArgumentException($"NameAndType not found at index {nameAndTypeIndex}");
+        }
+        
+        var nameAndTypeStruct = nameAndTypeInfo.ToStruct().ToConstantStruct() as ConstantNameAndTypeInfoStruct;
+        if (nameAndTypeStruct == null)
+        {
+            throw new ArgumentException($"Constant at index {nameAndTypeIndex} is not a name and type");
+        }
+        
+        ushort descriptorIndex = nameAndTypeStruct.DescriptorIndex;
+        
+        var descriptorInfo = Helper.ByIndex(descriptorIndex);
+        if (descriptorInfo == null)
+        {
+            throw new ArgumentException($"Descriptor not found at index {descriptorIndex}");
+        }
+        
+        var descriptorStruct = descriptorInfo.ToStruct().ToConstantStruct() as ConstantUtf8InfoStruct;
+        if (descriptorStruct == null)
+        {
+            throw new ArgumentException($"Constant at index {descriptorIndex} is not a UTF8 string");
+        }
+        
+        // 解析字段描述符
+        return DescriptorParser.ParseFieldDescriptor(descriptorStruct.ToString());
+    }
+
+    private ushort GetInvokeDynamicIndex(Code instruction)
+    {
+        if (instruction.Operands.Count > 0)
+        {
+            byte[] data = instruction.Operands[0].Data;
+            if (data.Length == 2)
+            {
+                return (ushort)((data[0] << 8) | data[1]);
+            }
+        }
+        return 0;
+    }
+
+    private string GetInvokeDynamicDescriptor(ushort invokeDynamicIndex)
+    {
+        // 从常量池获取调用动态描述符
+        var invokeDynamicInfo = Helper.ByIndex(invokeDynamicIndex);
+        if (invokeDynamicInfo == null)
+        {
+            throw new ArgumentException($"InvokeDynamic not found at index {invokeDynamicIndex}");
+        }
+        
+        var invokeDynamicStruct = invokeDynamicInfo.ToStruct().ToConstantStruct() as ConstantInvokeDynamicInfoStruct;
+        if (invokeDynamicStruct == null)
+        {
+            throw new ArgumentException($"Constant at index {invokeDynamicIndex} is not an InvokeDynamic");
+        }
+        
+        ushort nameAndTypeIndex = invokeDynamicStruct.NameAndTypeIndex;
+        
+        var nameAndTypeInfo = Helper.ByIndex(nameAndTypeIndex);
+        if (nameAndTypeInfo == null)
+        {
+            throw new ArgumentException($"NameAndType not found at index {nameAndTypeIndex}");
+        }
+        
+        var nameAndTypeStruct = nameAndTypeInfo.ToStruct().ToConstantStruct() as ConstantNameAndTypeInfoStruct;
+        if (nameAndTypeStruct == null)
+        {
+            throw new ArgumentException($"Constant at index {nameAndTypeIndex} is not a name and type");
+        }
+        
+        ushort descriptorIndex = nameAndTypeStruct.DescriptorIndex;
+        
+        var descriptorInfo = Helper.ByIndex(descriptorIndex);
+        if (descriptorInfo == null)
+        {
+            throw new ArgumentException($"Descriptor not found at index {descriptorIndex}");
+        }
+        
+        var descriptorStruct = descriptorInfo.ToStruct().ToConstantStruct() as ConstantUtf8InfoStruct;
+        if (descriptorStruct == null)
+        {
+            throw new ArgumentException($"Constant at index {descriptorIndex} is not a UTF8 string");
+        }
+        
+        return descriptorStruct.ToString();
+    }
+
+
 
     private void SimulateDupX1(ref FrameState state)
     {
@@ -1321,14 +1709,13 @@ public class CodeExecutor
     }
 
     
-    private void SimulateLoad(ref FrameState state, Code instruction)
+    private void SimulateLoad(ref FrameState state, Code instruction, VerificationTypeInfoStruct type)
     {
         int index = GetLoadStoreIndex(instruction);
         if (index < state.Locals.Length)
         {
-            var type = state.Locals[index];
             state.Stack = Push(state.Stack, type);
-            
+        
             // Long and double take two stack slots
             if (instruction.OpCode == OperationCode.LLOAD || instruction.OpCode == OperationCode.DLOAD)
             {
@@ -1340,26 +1727,29 @@ public class CodeExecutor
         }
     }
 
-    private void SimulateStore(ref FrameState state, Code instruction)
+
+    private void SimulateStore(ref FrameState state, Code instruction, int slotCount)
     {
         int index = GetLoadStoreIndex(instruction);
         if (index < state.Locals.Length)
         {
-            VerificationTypeInfoStruct value;
-            
-            // Long and double take two stack slots
-            if (instruction.OpCode == OperationCode.LSTORE || instruction.OpCode == OperationCode.DSTORE)
+            // 弹出指定数量的栈槽
+            var values = Pop(state.Stack, slotCount);
+        
+            // 存储第一个值到局部变量
+            state.Locals[index] = values[0];
+        
+            // 对于 Long 和 Double，还需要存储 Top 类型到下一个局部变量槽
+            if (slotCount == 2 && index + 1 < state.Locals.Length)
             {
-                value = Pop(state.Stack, 2)[0];
+                state.Locals[index + 1] = new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                };
             }
-            else
-            {
-                value = Pop(state.Stack, 1)[0];
-            }
-            
-            state.Locals[index] = value;
         }
     }
+
 
     private int GetLoadStoreIndex(Code instruction)
     {

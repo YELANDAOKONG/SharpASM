@@ -1111,6 +1111,10 @@ public class CodeExecutor
             case OperationCode.INVOKEDYNAMIC:
                 SimulateInvoke(ref newState, instruction);
                 break;
+            
+            case OperationCode.INVOKEVIRTUAL:
+                SimulateInvoke(ref newState, instruction);
+                break;
                 
             case OperationCode.MULTIANEWARRAY:
                 int dimensions = instruction.Operands[1].Data[0];
@@ -1129,6 +1133,8 @@ public class CodeExecutor
             case OperationCode.MONITOREXIT:
                 newState.Stack = Pop(newState.Stack, 1); // Pop object reference
                 break;
+            
+            
 
             // Extended
             case OperationCode.WIDE:
@@ -1419,28 +1425,33 @@ public class CodeExecutor
 
     private void SimulateInvoke(ref FrameState state, Code instruction)
     {
-        // Get method descriptor from constant pool
+        // 获取方法引用索引
         ushort methodRefIndex = GetMethodRefIndex(instruction);
+    
+        // 从常量池获取方法描述符
         var methodDescriptor = GetMethodDescriptor(methodRefIndex);
         var descriptorInfo = DescriptorParser.ParseMethodDescriptor(methodDescriptor);
-        
-        // Pop arguments
+    
+        // 计算需要弹出的参数数量
         int popCount = descriptorInfo.Parameters.Count;
-        if ((instruction.OpCode != OperationCode.INVOKESTATIC) && 
-            (instruction.OpCode != OperationCode.INVOKEDYNAMIC))
+    
+        // 对于非静态方法，需要额外弹出 this 引用
+        if (instruction.OpCode != OperationCode.INVOKESTATIC && 
+            instruction.OpCode != OperationCode.INVOKEDYNAMIC)
         {
-            popCount++; // Add one for 'this' reference
+            popCount++;
         }
-        
+    
+        // 弹出参数
         state.Stack = Pop(state.Stack, popCount);
-        
-        // Push return value if not void
+    
+        // 如果有返回值，推入栈
         if (descriptorInfo.ReturnType != null && descriptorInfo.ReturnType.Descriptor != "V")
         {
             var returnType = ConvertDescriptorToVerificationType(descriptorInfo.ReturnType);
             state.Stack = Push(state.Stack, returnType);
-            
-            // Long and double take two stack slots
+        
+            // 对于 Long 和 Double 类型，需要额外的栈槽
             if (descriptorInfo.ReturnType.Descriptor == "J" || 
                 descriptorInfo.ReturnType.Descriptor == "D")
             {

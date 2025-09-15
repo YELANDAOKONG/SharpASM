@@ -5,6 +5,9 @@ using SharpASM.Models.Struct.Union;
 using System.Collections.Generic;
 using System.Linq;
 using SharpASM.Analysis.Executor.Models;
+using SharpASM.Utilities;
+using System;
+using SharpASM.Models.Type;
 
 namespace SharpASM.Analysis.Executor;
 
@@ -15,14 +18,18 @@ public class CodeExecutor
     public List<Code> Codes { get; private set; }
     private Dictionary<int, FrameState> _frameStates;
     private List<int> _instructionOffsets;
+    private List<BasicBlock> _basicBlocks;
+    private Method _method;
 
-    public CodeExecutor(Class clazz, CodeAttributeStruct code, List<Code> byteCodes)
+    public CodeExecutor(Class clazz, Method method, CodeAttributeStruct code, List<Code> byteCodes)
     {
         Clazz = clazz;
         Code = code;
         Codes = byteCodes;
+        _method = method;
         _frameStates = new Dictionary<int, FrameState>();
         _instructionOffsets = CalculateInstructionOffsets();
+        _basicBlocks = new List<BasicBlock>();
     }
     
     public StackMapTableAttributeStruct RebuildStackMapTable()
@@ -57,10 +64,15 @@ public class CodeExecutor
         int length = 0;
         if (code.Prefix.HasValue) length += 1;
         length += 1; // opcode
-        foreach (var operand in code.Operands)
+        
+        if (OperationCodeMapping.TryGetOperandInfo(code.OpCode, out int operandCount, out int[] operandSizes))
         {
-            length += operand.Data.Length;
+            for (int i = 0; i < Math.Min(operandCount, code.Operands.Count); i++)
+            {
+                length += operandSizes[i];
+            }
         }
+        
         return length;
     }
 
@@ -91,10 +103,110 @@ public class CodeExecutor
             foreach (var handler in Code.ExceptionTable)
             {
                 leaders.Add(handler.HandlerPc);
+                leaders.Add(handler.StartPc); // Start of protected block
+                if (handler.EndPc < Code.CodeLength)
+                {
+                    leaders.Add(handler.EndPc); // Instruction after protected block
+                }
             }
         }
         
-        // TODO: Store basic block information for later use
+        // Create basic blocks
+        var sortedLeaders = leaders.OrderBy(o => o).ToList();
+        for (int i = 0; i < sortedLeaders.Count; i++)
+        {
+            int startOffset = sortedLeaders[i];
+            int endOffset = (i < sortedLeaders.Count - 1) ? sortedLeaders[i + 1] - 1 : (int)Code.CodeLength - 1;
+            
+            var block = new BasicBlock
+            {
+                StartOffset = startOffset,
+                EndOffset = endOffset,
+                Instructions = GetInstructionsInRange(startOffset, endOffset)
+            };
+            
+            _basicBlocks.Add(block);
+        }
+        
+        // Connect basic blocks
+        foreach (var block in _basicBlocks)
+        {
+            var lastInstruction = block.Instructions.Last();
+            int lastOffset = _instructionOffsets[Codes.IndexOf(lastInstruction)];
+            
+            if (IsBranch(lastInstruction.OpCode))
+            {
+                int targetOffset = lastOffset + GetBranchOffset(lastInstruction);
+                var targetBlock = _basicBlocks.FirstOrDefault(b => b.StartOffset <= targetOffset && b.EndOffset >= targetOffset);
+                if (targetBlock != null)
+                {
+                    block.Successors.Add(targetBlock);
+                }
+                
+                // Fall-through for conditional branches
+                if (IsConditionalBranch(lastInstruction.OpCode) && lastOffset < Code.CodeLength - 1)
+                {
+                    int fallThroughOffset = lastOffset + GetInstructionLength(lastInstruction);
+                    var fallThroughBlock = _basicBlocks.FirstOrDefault(b => b.StartOffset <= fallThroughOffset && b.EndOffset >= fallThroughOffset);
+                    if (fallThroughBlock != null)
+                    {
+                        block.Successors.Add(fallThroughBlock);
+                    }
+                }
+            }
+            else if (!IsReturn(lastInstruction.OpCode) && !IsThrow(lastInstruction.OpCode))
+            {
+                // Fall-through for non-branching instructions
+                if (lastOffset < Code.CodeLength - 1)
+                {
+                    int fallThroughOffset = lastOffset + GetInstructionLength(lastInstruction);
+                    var fallThroughBlock = _basicBlocks.FirstOrDefault(b => b.StartOffset <= fallThroughOffset && b.EndOffset >= fallThroughOffset);
+                    if (fallThroughBlock != null)
+                    {
+                        block.Successors.Add(fallThroughBlock);
+                    }
+                }
+            }
+            
+            // Exception handlers
+            foreach (var handler in Code.ExceptionTable)
+            {
+                if (block.StartOffset >= handler.StartPc && block.EndOffset < handler.EndPc)
+                {
+                    var handlerBlock = _basicBlocks.FirstOrDefault(b => b.StartOffset == handler.HandlerPc);
+                    if (handlerBlock != null)
+                    {
+                        block.ExceptionHandlers.Add(handlerBlock);
+                    }
+                }
+            }
+        }
+    }
+
+    private List<Code> GetInstructionsInRange(int startOffset, int endOffset)
+    {
+        var result = new List<Code>();
+        int currentOffset = 0;
+        
+        for (int i = 0; i < Codes.Count; i++)
+        {
+            var code = Codes[i];
+            int codeLength = GetInstructionLength(code);
+            
+            if (currentOffset >= startOffset && currentOffset <= endOffset)
+            {
+                result.Add(code);
+            }
+            
+            currentOffset += codeLength;
+            
+            if (currentOffset > endOffset)
+            {
+                break;
+            }
+        }
+        
+        return result;
     }
 
     private bool IsBranch(OperationCode opCode)
@@ -112,74 +224,732 @@ public class CodeExecutor
         };
     }
 
+    private bool IsConditionalBranch(OperationCode opCode)
+    {
+        return opCode switch
+        {
+            OperationCode.IFEQ or OperationCode.IFNE or OperationCode.IFLT or 
+            OperationCode.IFGE or OperationCode.IFGT or OperationCode.IFLE or
+            OperationCode.IF_ICMPEQ or OperationCode.IF_ICMPNE or OperationCode.IF_ICMPLT or
+            OperationCode.IF_ICMPGE or OperationCode.IF_ICMPGT or OperationCode.IF_ICMPLE or
+            OperationCode.IF_ACMPEQ or OperationCode.IF_ACMPNE or OperationCode.IFNULL or
+            OperationCode.IFNONNULL => true,
+            _ => false
+        };
+    }
+
+    private bool IsReturn(OperationCode opCode)
+    {
+        return opCode switch
+        {
+            OperationCode.RETURN or OperationCode.IRETURN or OperationCode.LRETURN or
+            OperationCode.FRETURN or OperationCode.DRETURN or OperationCode.ARETURN => true,
+            _ => false
+        };
+    }
+
+    private bool IsThrow(OperationCode opCode)
+    {
+        return opCode == OperationCode.ATHROW;
+    }
+
     private int GetBranchOffset(Code code)
     {
-        // Extract branch offset from operands
-        // This is a simplified implementation
-        if (code.Operands.Count > 0)
+        if (code.Operands.Count == 0) return 0;
+        
+        byte[] data = code.Operands[0].Data;
+        if (data.Length == 2)
         {
-            byte[] data = code.Operands[0].Data;
-            if (data.Length == 2)
-            {
-                return (short)((data[0] << 8) | data[1]);
-            }
+            return (short)((data[0] << 8) | data[1]);
         }
+        else if (data.Length == 4 && (code.OpCode == OperationCode.GOTO_W || code.OpCode == OperationCode.JSR_W))
+        {
+            return (int)((data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3]);
+        }
+        
         return 0;
     }
 
     private void InitializeInitialFrameState()
     {
-        // TODO: Implement based on method descriptor and access flags
-        // For now, create an empty frame state
+        // Parse method descriptor to get parameter types
+        var descriptorInfo = DescriptorParser.ParseMethodDescriptor(_method.Descriptor);
+        var initialLocals = new List<VerificationTypeInfoStruct>();
+        
+        // Add 'this' for non-static methods
+        bool isStatic = (_method.AccessFlags & MethodAccessFlags.Static) != 0;
+        if (!isStatic)
+        {
+            initialLocals.Add(CreateObjectTypeInfo(Clazz.ThisClass));
+        }
+        
+        // Add parameters
+        foreach (var param in descriptorInfo.Parameters)
+        {
+            var typeInfo = ConvertDescriptorToVerificationType(param);
+            initialLocals.Add(typeInfo);
+            
+            // Long and double take two slots
+            if (param.Descriptor == "J" || param.Descriptor == "D")
+            {
+                initialLocals.Add(new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+            }
+        }
+        
+        // Pad to MaxLocals if needed
+        while (initialLocals.Count < Code.MaxLocals)
+        {
+            initialLocals.Add(new VerificationTypeInfoStruct
+            {
+                TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+            });
+        }
+        
         _frameStates[0] = new FrameState
         {
-            Locals = new VerificationTypeInfoStruct[Code.MaxLocals],
+            Locals = initialLocals.ToArray(),
             Stack = new VerificationTypeInfoStruct[0]
+        };
+    }
+
+    private VerificationTypeInfoStruct ConvertDescriptorToVerificationType(DescriptorParser.FieldTypeInfo typeInfo)
+    {
+        if (typeInfo.IsPrimitive)
+        {
+            return typeInfo.Descriptor switch
+            {
+                "B" or "C" or "I" or "S" or "Z" => new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                },
+                "F" => new VerificationTypeInfoStruct
+                {
+                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+                },
+                "J" => new VerificationTypeInfoStruct
+                {
+                    LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
+                },
+                "D" => new VerificationTypeInfoStruct
+                {
+                    DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
+                },
+                _ => throw new ArgumentException($"Unknown primitive type: {typeInfo.Descriptor}")
+            };
+        }
+        else if (typeInfo.Descriptor == "Ljava/lang/Object;")
+        {
+            return new VerificationTypeInfoStruct
+            {
+                ObjectVariableInfo = new ObjectVariableInfoStruct
+                {
+                    Tag = 7,
+                    CPoolIndex = FindClassConstantIndex("java/lang/Object")
+                }
+            };
+        }
+        else if (typeInfo.Descriptor.StartsWith("L"))
+        {
+            string className = typeInfo.Descriptor.Substring(1, typeInfo.Descriptor.Length - 2);
+            return new VerificationTypeInfoStruct
+            {
+                ObjectVariableInfo = new ObjectVariableInfoStruct
+                {
+                    Tag = 7,
+                    CPoolIndex = FindClassConstantIndex(className)
+                }
+            };
+        }
+        else if (typeInfo.Descriptor.StartsWith("["))
+        {
+            // For arrays, we use Object type for now (simplified)
+            return new VerificationTypeInfoStruct
+            {
+                ObjectVariableInfo = new ObjectVariableInfoStruct
+                {
+                    Tag = 7,
+                    CPoolIndex = FindClassConstantIndex("java/lang/Object")
+                }
+            };
+        }
+        
+        throw new ArgumentException($"Unknown type descriptor: {typeInfo.Descriptor}");
+    }
+
+    private ushort FindClassConstantIndex(string className)
+    {
+        // Simplified implementation - in real scenario, search constant pool
+        // For now, return a placeholder
+        return 1;
+    }
+
+    private VerificationTypeInfoStruct CreateObjectTypeInfo(string className)
+    {
+        return new VerificationTypeInfoStruct
+        {
+            ObjectVariableInfo = new ObjectVariableInfoStruct
+            {
+                Tag = 7,
+                CPoolIndex = FindClassConstantIndex(className)
+            }
         };
     }
 
     private void SimulateExecution()
     {
-        // TODO: Implement abstract interpretation
-        // For now, this is a placeholder
-        foreach (var offset in _instructionOffsets)
+        // Worklist algorithm for data flow analysis
+        var worklist = new Queue<BasicBlock>();
+        var visited = new HashSet<BasicBlock>();
+        
+        // Start with initial block
+        var initialBlock = _basicBlocks.First(b => b.StartOffset == 0);
+        worklist.Enqueue(initialBlock);
+        visited.Add(initialBlock);
+        
+        while (worklist.Count > 0)
         {
-            if (!_frameStates.ContainsKey(offset))
+            var block = worklist.Dequeue();
+            
+            // Get initial state for this block (merge from predecessors)
+            FrameState currentState = GetMergedState(block);
+            
+            // Simulate each instruction in the block
+            foreach (var instruction in block.Instructions)
             {
-                continue;
+                currentState = SimulateInstruction(currentState, instruction);
             }
             
-            var currentState = _frameStates[offset];
-            // Simulate instruction effect on frame state
-            // Update MaxStack and MaxLocals if needed
+            // Update final state for this block
+            _frameStates[block.EndOffset] = currentState;
+            
+            // Propagate to successors
+            foreach (var successor in block.Successors)
+            {
+                if (!visited.Contains(successor))
+                {
+                    worklist.Enqueue(successor);
+                    visited.Add(successor);
+                }
+            }
+            
+            // Propagate to exception handlers
+            foreach (var handler in block.ExceptionHandlers)
+            {
+                if (!visited.Contains(handler))
+                {
+                    worklist.Enqueue(handler);
+                    visited.Add(handler);
+                }
+                
+                // Exception handlers start with exception object on stack
+                var handlerState = new FrameState
+                {
+                    Locals = currentState.Locals,
+                    Stack = new[] { CreateObjectTypeInfo("java/lang/Throwable") }
+                };
+                
+                _frameStates[handler.StartOffset] = handlerState;
+            }
         }
+    }
+
+    private FrameState GetMergedState(BasicBlock block)
+    {
+        var predecessors = _basicBlocks.Where(b => b.Successors.Contains(block)).ToList();
+        
+        if (predecessors.Count == 0)
+        {
+            // Initial block or exception handler
+            if (_frameStates.TryGetValue(block.StartOffset, out var state))
+            {
+                return state.Clone();
+            }
+            else
+            {
+                // Should not happen for well-structured code
+                return new FrameState
+                {
+                    Locals = new VerificationTypeInfoStruct[Code.MaxLocals],
+                    Stack = new VerificationTypeInfoStruct[0]
+                };
+            }
+        }
+        
+        // Start with first predecessor's state
+        var firstState = _frameStates[predecessors[0].EndOffset].Clone();
+        
+        // Merge with other predecessors
+        for (int i = 1; i < predecessors.Count; i++)
+        {
+            var otherState = _frameStates[predecessors[i].EndOffset];
+            firstState = MergeFrameStates(firstState, otherState);
+        }
+        
+        return firstState;
+    }
+
+    private FrameState MergeFrameStates(FrameState state1, FrameState state2)
+    {
+        // For simplicity, we use the more general type when types differ
+        // In a real implementation, we would need proper type merging rules
+        
+        var mergedLocals = new VerificationTypeInfoStruct[Code.MaxLocals];
+        for (int i = 0; i < Code.MaxLocals; i++)
+        {
+            if (i < state1.Locals.Length && i < state2.Locals.Length)
+            {
+                if (AreTypesEqual(state1.Locals[i], state2.Locals[i]))
+                {
+                    mergedLocals[i] = state1.Locals[i];
+                }
+                else
+                {
+                    // Types differ - use top
+                    mergedLocals[i] = new VerificationTypeInfoStruct
+                    {
+                        TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                    };
+                }
+            }
+        }
+        
+        // Stack must be identical at merge points
+        if (state1.Stack.Length != state2.Stack.Length)
+        {
+            throw new InvalidProgramException("Inconsistent stack height at merge point");
+        }
+        
+        var mergedStack = new VerificationTypeInfoStruct[state1.Stack.Length];
+        for (int i = 0; i < state1.Stack.Length; i++)
+        {
+            if (AreTypesEqual(state1.Stack[i], state2.Stack[i]))
+            {
+                mergedStack[i] = state1.Stack[i];
+            }
+            else
+            {
+                // Types differ - use top
+                mergedStack[i] = new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                };
+            }
+        }
+        
+        return new FrameState
+        {
+            Locals = mergedLocals,
+            Stack = mergedStack
+        };
+    }
+
+    private bool AreTypesEqual(VerificationTypeInfoStruct type1, VerificationTypeInfoStruct type2)
+    {
+        // Simplified type equality check
+        if (type1.TopVariableInfo != null && type2.TopVariableInfo != null) return true;
+        if (type1.IntegerVariableInfo != null && type2.IntegerVariableInfo != null) return true;
+        if (type1.FloatVariableInfo != null && type2.FloatVariableInfo != null) return true;
+        if (type1.LongVariableInfo != null && type2.LongVariableInfo != null) return true;
+        if (type1.DoubleVariableInfo != null && type2.DoubleVariableInfo != null) return true;
+        if (type1.NullVariableInfo != null && type2.NullVariableInfo != null) return true;
+        if (type1.UninitializedThisVariableInfo != null && type2.UninitializedThisVariableInfo != null) return true;
+        
+        if (type1.ObjectVariableInfo != null && type2.ObjectVariableInfo != null)
+        {
+            return type1.ObjectVariableInfo.CPoolIndex == type2.ObjectVariableInfo.CPoolIndex;
+        }
+        
+        if (type1.UninitializedVariableInfo != null && type2.UninitializedVariableInfo != null)
+        {
+            return type1.UninitializedVariableInfo.Offset == type2.UninitializedVariableInfo.Offset;
+        }
+        
+        return false;
+    }
+
+    private FrameState SimulateInstruction(FrameState state, Code instruction)
+    {
+        // Simplified instruction simulation
+        // Real implementation would handle all instruction types
+        
+        var newState = state.Clone();
+        
+        switch (instruction.OpCode)
+        {
+            case OperationCode.ILOAD:
+            case OperationCode.LLOAD:
+            case OperationCode.FLOAD:
+            case OperationCode.DLOAD:
+            case OperationCode.ALOAD:
+                SimulateLoad(ref newState, instruction);
+                break;
+                
+            case OperationCode.ISTORE:
+            case OperationCode.LSTORE:
+            case OperationCode.FSTORE:
+            case OperationCode.DSTORE:
+            case OperationCode.ASTORE:
+                SimulateStore(ref newState, instruction);
+                break;
+                
+            case OperationCode.IADD:
+            case OperationCode.LADD:
+            case OperationCode.FADD:
+            case OperationCode.DADD:
+                SimulateBinaryOp(ref newState);
+                break;
+                
+            case OperationCode.ACONST_NULL:
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    NullVariableInfo = new NullVariableInfoStruct { Tag = 5 }
+                });
+                break;
+                
+            case OperationCode.ICONST_0:
+            case OperationCode.ICONST_1:
+            case OperationCode.ICONST_2:
+            case OperationCode.ICONST_3:
+            case OperationCode.ICONST_4:
+            case OperationCode.ICONST_5:
+            case OperationCode.BIPUSH:
+            case OperationCode.SIPUSH:
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+                
+            case OperationCode.GETFIELD:
+                SimulateGetField(ref newState, instruction);
+                break;
+                
+            case OperationCode.PUTFIELD:
+                SimulatePutField(ref newState, instruction);
+                break;
+                
+            case OperationCode.INVOKEVIRTUAL:
+            case OperationCode.INVOKESPECIAL:
+            case OperationCode.INVOKESTATIC:
+            case OperationCode.INVOKEINTERFACE:
+                SimulateInvoke(ref newState, instruction);
+                break;
+                
+            case OperationCode.NEW:
+                SimulateNew(ref newState, instruction);
+                break;
+                
+            case OperationCode.POP:
+                newState.Stack = Pop(newState.Stack, 1);
+                break;
+                
+            case OperationCode.POP2:
+                newState.Stack = Pop(newState.Stack, 2);
+                break;
+                
+            case OperationCode.DUP:
+                SimulateDup(ref newState);
+                break;
+                
+            // Many more instructions would be handled in a complete implementation
+        }
+        
+        return newState;
+    }
+
+    private void SimulateLoad(ref FrameState state, Code instruction)
+    {
+        int index = GetLoadStoreIndex(instruction);
+        if (index < state.Locals.Length)
+        {
+            var type = state.Locals[index];
+            state.Stack = Push(state.Stack, type);
+            
+            // Long and double take two stack slots
+            if (instruction.OpCode == OperationCode.LLOAD || instruction.OpCode == OperationCode.DLOAD)
+            {
+                state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+            }
+        }
+    }
+
+    private void SimulateStore(ref FrameState state, Code instruction)
+    {
+        int index = GetLoadStoreIndex(instruction);
+        if (index < state.Locals.Length)
+        {
+            VerificationTypeInfoStruct value;
+            
+            // Long and double take two stack slots
+            if (instruction.OpCode == OperationCode.LSTORE || instruction.OpCode == OperationCode.DSTORE)
+            {
+                value = Pop(state.Stack, 2)[0];
+            }
+            else
+            {
+                value = Pop(state.Stack, 1)[0];
+            }
+            
+            state.Locals[index] = value;
+        }
+    }
+
+    private int GetLoadStoreIndex(Code instruction)
+    {
+        if (instruction.Operands.Count > 0)
+        {
+            byte[] data = instruction.Operands[0].Data;
+            if (data.Length == 1)
+            {
+                return data[0];
+            }
+            else if (data.Length == 2)
+            {
+                return (data[0] << 8) | data[1];
+            }
+        }
+        
+        // Handle fixed index instructions (ILOAD_0, ILOAD_1, etc.)
+        return instruction.OpCode switch
+        {
+            OperationCode.ILOAD_0 or OperationCode.LLOAD_0 or OperationCode.FLOAD_0 or 
+            OperationCode.DLOAD_0 or OperationCode.ALOAD_0 => 0,
+            OperationCode.ILOAD_1 or OperationCode.LLOAD_1 or OperationCode.FLOAD_1 or 
+            OperationCode.DLOAD_1 or OperationCode.ALOAD_1 => 1,
+            OperationCode.ILOAD_2 or OperationCode.LLOAD_2 or OperationCode.FLOAD_2 or 
+            OperationCode.DLOAD_2 or OperationCode.ALOAD_2 => 2,
+            OperationCode.ILOAD_3 or OperationCode.LLOAD_3 or OperationCode.FLOAD_3 or 
+            OperationCode.DLOAD_3 or OperationCode.ALOAD_3 => 3,
+            _ => 0
+        };
+    }
+
+    private void SimulateBinaryOp(ref FrameState state)
+    {
+        // Pop two operands, push result
+        state.Stack = Pop(state.Stack, 2);
+        
+        // Determine result type based on operation
+        VerificationTypeInfoStruct resultType = new VerificationTypeInfoStruct
+        {
+            IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+        };
+        
+        state.Stack = Push(state.Stack, resultType);
+    }
+
+    private void SimulateGetField(ref FrameState state, Code instruction)
+    {
+        // Pop object reference
+        state.Stack = Pop(state.Stack, 1);
+        
+        // Push field type (simplified - always use integer)
+        state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+        {
+            IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+        });
+    }
+
+    private void SimulatePutField(ref FrameState state, Code instruction)
+    {
+        // Pop value and object reference
+        state.Stack = Pop(state.Stack, 2);
+    }
+
+    private void SimulateInvoke(ref FrameState state, Code instruction)
+    {
+        // Get method descriptor from constant pool
+        ushort methodRefIndex = GetMethodRefIndex(instruction);
+        var methodDescriptor = GetMethodDescriptor(methodRefIndex);
+        var descriptorInfo = DescriptorParser.ParseMethodDescriptor(methodDescriptor);
+        
+        // Pop arguments
+        int popCount = descriptorInfo.Parameters.Count;
+        if ((instruction.OpCode != OperationCode.INVOKESTATIC) && 
+            (instruction.OpCode != OperationCode.INVOKEDYNAMIC))
+        {
+            popCount++; // Add one for 'this' reference
+        }
+        
+        state.Stack = Pop(state.Stack, popCount);
+        
+        // Push return value if not void
+        if (descriptorInfo.ReturnType != null && descriptorInfo.ReturnType.Descriptor != "V")
+        {
+            var returnType = ConvertDescriptorToVerificationType(descriptorInfo.ReturnType);
+            state.Stack = Push(state.Stack, returnType);
+            
+            // Long and double take two stack slots
+            if (descriptorInfo.ReturnType.Descriptor == "J" || 
+                descriptorInfo.ReturnType.Descriptor == "D")
+            {
+                state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+            }
+        }
+    }
+
+    private ushort GetMethodRefIndex(Code instruction)
+    {
+        if (instruction.Operands.Count > 0)
+        {
+            byte[] data = instruction.Operands[0].Data;
+            if (data.Length == 2)
+            {
+                return (ushort)((data[0] << 8) | data[1]);
+            }
+        }
+        return 0;
+    }
+
+    private string GetMethodDescriptor(ushort methodRefIndex)
+    {
+        // Simplified - in real implementation, look up in constant pool
+        return "()V";
+    }
+
+    private void SimulateNew(ref FrameState state, Code instruction)
+    {
+        // Push uninitialized object reference
+        ushort classIndex = GetClassIndex(instruction);
+        state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+        {
+            UninitializedVariableInfo = new UninitializedVariableInfoStruct
+            {
+                Tag = 8,
+                Offset = (ushort)_instructionOffsets[Codes.IndexOf(instruction)]
+            }
+        });
+    }
+
+    private ushort GetClassIndex(Code instruction)
+    {
+        if (instruction.Operands.Count > 0)
+        {
+            byte[] data = instruction.Operands[0].Data;
+            if (data.Length == 2)
+            {
+                return (ushort)((data[0] << 8) | data[1]);
+            }
+        }
+        return 0;
+    }
+
+    private void SimulateDup(ref FrameState state)
+    {
+        if (state.Stack.Length > 0)
+        {
+            var top = state.Stack[state.Stack.Length - 1];
+            state.Stack = Push(state.Stack, top);
+        }
+    }
+
+    private VerificationTypeInfoStruct[] Push(VerificationTypeInfoStruct[] stack, VerificationTypeInfoStruct value)
+    {
+        var newStack = new VerificationTypeInfoStruct[stack.Length + 1];
+        Array.Copy(stack, newStack, stack.Length);
+        newStack[stack.Length] = value;
+        return newStack;
+    }
+
+    private VerificationTypeInfoStruct[] Pop(VerificationTypeInfoStruct[] stack, int count)
+    {
+        if (stack.Length < count)
+        {
+            throw new InvalidProgramException("Stack underflow");
+        }
+        
+        var newStack = new VerificationTypeInfoStruct[stack.Length - count];
+        Array.Copy(stack, newStack, stack.Length - count);
+        return newStack;
     }
     
     private List<StackMapFrameStruct> BuildFrames()
     {
         var frames = new List<StackMapFrameStruct>();
         
-        // Create frames for each basic block start
-        foreach (var offset in _frameStates.Keys.OrderBy(o => o))
+        // Get all frame positions (basic block starts)
+        var framePositions = _basicBlocks.Select(b => b.StartOffset)
+            .Concat(_basicBlocks.SelectMany(b => b.ExceptionHandlers).Select(h => h.StartOffset))
+            .Distinct()
+            .OrderBy(o => o)
+            .ToList();
+        
+        int previousOffset = 0;
+        
+        foreach (var offset in framePositions)
         {
-            var frameState = _frameStates[offset];
-            var frame = CreateStackMapFrame(offset, frameState);
-            frames.Add(frame);
+            if (_frameStates.TryGetValue(offset, out var frameState))
+            {
+                int offsetDelta = offset - previousOffset;
+                previousOffset = offset;
+                
+                var frame = CreateStackMapFrame(offsetDelta, frameState);
+                frames.Add(frame);
+            }
         }
         
         return frames;
     }
 
-    private StackMapFrameStruct CreateStackMapFrame(int offset, FrameState frameState)
+    private StackMapFrameStruct CreateStackMapFrame(int offsetDelta, FrameState frameState)
     {
-        // TODO: Implement proper frame type selection based on JVM spec
-        // For now, always use full frames
+        // Choose the most compact frame type
+        
+        // Check for same frame
+        if (frameState.Stack.Length == 0)
+        {
+            return new StackMapFrameStruct
+            {
+                SameFrame = new SameFrameStruct
+                {
+                    FrameType = (byte)Math.Min(offsetDelta, 63)
+                }
+            };
+        }
+        
+        // Check for same locals with one stack item
+        if (frameState.Stack.Length == 1 && offsetDelta <= 63)
+        {
+            return new StackMapFrameStruct
+            {
+                SameLocals1StackItemFrame = new SameLocals1StackItemFrameStruct
+                {
+                    FrameType = (byte)(64 + offsetDelta),
+                    Stack = new[] { frameState.Stack[0] }
+                }
+            };
+        }
+        
+        // Use extended frames for larger offsets or more complex states
+        if (frameState.Stack.Length == 1)
+        {
+            return new StackMapFrameStruct
+            {
+                SameLocals1StackItemFrameExtended = new SameLocals1StackItemFrameExtendedStruct
+                {
+                    FrameType = 247,
+                    OffsetDelta = (ushort)offsetDelta,
+                    Stack = new[] { frameState.Stack[0] }
+                }
+            };
+        }
+        
+        // Use full frame for complex states
         return new StackMapFrameStruct
         {
             FullFrame = new FullFrameStruct
             {
-                FrameType = 255, // FULL_FRAME
-                OffsetDelta = (ushort)offset,
+                FrameType = 255,
+                OffsetDelta = (ushort)offsetDelta,
                 NumberOfLocals = (ushort)frameState.Locals.Length,
                 Locals = frameState.Locals,
                 NumberOfStackItems = (ushort)frameState.Stack.Length,
@@ -205,4 +975,14 @@ public class CodeExecutor
         Code.MaxStack = maxStack;
         Code.MaxLocals = maxLocals;
     }
+}
+
+// Basic block representation
+public class BasicBlock
+{
+    public int StartOffset { get; set; }
+    public int EndOffset { get; set; }
+    public List<Code> Instructions { get; set; } = new List<Code>();
+    public List<BasicBlock> Successors { get; set; } = new List<BasicBlock>();
+    public List<BasicBlock> ExceptionHandlers { get; set; } = new List<BasicBlock>();
 }

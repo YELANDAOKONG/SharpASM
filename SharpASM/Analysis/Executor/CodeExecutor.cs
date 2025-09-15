@@ -614,186 +614,686 @@ public class CodeExecutor
 
     private FrameState SimulateInstruction(FrameState state, Code instruction)
     {
-        // Simplified instruction simulation
-        // Real implementation would handle all instruction types
-        
         var newState = state.Clone();
         
         switch (instruction.OpCode)
         {
-            case OperationCode.ILOAD:
-            case OperationCode.LLOAD:
-            case OperationCode.FLOAD:
-            case OperationCode.DLOAD:
-            case OperationCode.ALOAD:
-                SimulateLoad(ref newState, instruction);
+            // Constants
+            case OperationCode.NOP:
+                // No operation
                 break;
                 
-            case OperationCode.ISTORE:
-            case OperationCode.LSTORE:
-            case OperationCode.FSTORE:
-            case OperationCode.DSTORE:
-            case OperationCode.ASTORE:
-                SimulateStore(ref newState, instruction);
-                break;
-                
-            case OperationCode.IADD:
-            case OperationCode.LADD:
-            case OperationCode.FADD:
-            case OperationCode.DADD:
-                SimulateBinaryOp(ref newState);
-                break;
-                
-            case OperationCode.ACONST_NULL:
+            case OperationCode.LCONST_0:
                 newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
                 {
-                    NullVariableInfo = new NullVariableInfoStruct { Tag = 5 }
+                    LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
                 });
                 break;
                 
-            case OperationCode.ICONST_0:
-            case OperationCode.ICONST_1:
-            case OperationCode.ICONST_2:
-            case OperationCode.ICONST_3:
-            case OperationCode.ICONST_4:
-            case OperationCode.ICONST_5:
-            case OperationCode.BIPUSH:
-            case OperationCode.SIPUSH:
+            case OperationCode.LCONST_1:
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case OperationCode.FCONST_0:
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+                });
+                break;
+                
+            case OperationCode.FCONST_1:
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+                });
+                break;
+                
+            case OperationCode.FCONST_2:
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+                });
+                break;
+                
+            case OperationCode.DCONST_0:
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case OperationCode.DCONST_1:
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case OperationCode.LDC:
+            case OperationCode.LDC_W:
+            case OperationCode.LDC2_W:
+                SimulateLdc(ref newState, instruction);
+                break;
+
+            // Loads
+            case OperationCode.ILOAD_0:
+            case OperationCode.ILOAD_1:
+            case OperationCode.ILOAD_2:
+            case OperationCode.ILOAD_3:
+            case OperationCode.LLOAD_0:
+            case OperationCode.LLOAD_1:
+            case OperationCode.LLOAD_2:
+            case OperationCode.LLOAD_3:
+            case OperationCode.FLOAD_0:
+            case OperationCode.FLOAD_1:
+            case OperationCode.FLOAD_2:
+            case OperationCode.FLOAD_3:
+            case OperationCode.DLOAD_0:
+            case OperationCode.DLOAD_1:
+            case OperationCode.DLOAD_2:
+            case OperationCode.DLOAD_3:
+            case OperationCode.ALOAD_0:
+            case OperationCode.ALOAD_1:
+            case OperationCode.ALOAD_2:
+            case OperationCode.ALOAD_3:
+                SimulateLoad(ref newState, instruction);
+                break;
+                
+            case OperationCode.IALOAD:
+                newState.Stack = Pop(newState.Stack, 2); // Pop index and array ref
                 newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
                 {
                     IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
                 });
                 break;
                 
-            case OperationCode.GETFIELD:
-                SimulateGetField(ref newState, instruction);
+            case OperationCode.LALOAD:
+                newState.Stack = Pop(newState.Stack, 2); // Pop index and array ref
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
                 break;
                 
-            case OperationCode.PUTFIELD:
-                SimulatePutField(ref newState, instruction);
+            case OperationCode.FALOAD:
+                newState.Stack = Pop(newState.Stack, 2); // Pop index and array ref
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+                });
                 break;
                 
-            case OperationCode.INVOKEVIRTUAL:
-            case OperationCode.INVOKESPECIAL:
-            case OperationCode.INVOKESTATIC:
-            case OperationCode.INVOKEINTERFACE:
-                SimulateInvoke(ref newState, instruction);
+            case OperationCode.DALOAD:
+                newState.Stack = Pop(newState.Stack, 2); // Pop index and array ref
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
                 break;
                 
-            case OperationCode.NEW:
-                SimulateNew(ref newState, instruction);
+            case OperationCode.AALOAD:
+                newState.Stack = Pop(newState.Stack, 2); // Pop index and array ref
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    ObjectVariableInfo = new ObjectVariableInfoStruct
+                    {
+                        Tag = 7,
+                        CPoolIndex = FindClassConstantIndex("java/lang/Object")
+                    }
+                });
                 break;
                 
-            case OperationCode.POP:
+            case OperationCode.BALOAD:
+            case OperationCode.CALOAD:
+            case OperationCode.SALOAD:
+                newState.Stack = Pop(newState.Stack, 2); // Pop index and array ref
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+
+            // Stores
+            case OperationCode.ISTORE_0:
+            case OperationCode.ISTORE_1:
+            case OperationCode.ISTORE_2:
+            case OperationCode.ISTORE_3:
+            case OperationCode.LSTORE_0:
+            case OperationCode.LSTORE_1:
+            case OperationCode.LSTORE_2:
+            case OperationCode.LSTORE_3:
+            case OperationCode.FSTORE_0:
+            case OperationCode.FSTORE_1:
+            case OperationCode.FSTORE_2:
+            case OperationCode.FSTORE_3:
+            case OperationCode.DSTORE_0:
+            case OperationCode.DSTORE_1:
+            case OperationCode.DSTORE_2:
+            case OperationCode.DSTORE_3:
+            case OperationCode.ASTORE_0:
+            case OperationCode.ASTORE_1:
+            case OperationCode.ASTORE_2:
+            case OperationCode.ASTORE_3:
+                SimulateStore(ref newState, instruction);
+                break;
+                
+            case OperationCode.IASTORE:
+                newState.Stack = Pop(newState.Stack, 3); // Pop value, index, and array ref
+                break;
+                
+            case OperationCode.LASTORE:
+                newState.Stack = Pop(newState.Stack, 4); // Pop value (2 slots), index, and array ref
+                break;
+                
+            case OperationCode.FASTORE:
+                newState.Stack = Pop(newState.Stack, 3); // Pop value, index, and array ref
+                break;
+                
+            case OperationCode.DASTORE:
+                newState.Stack = Pop(newState.Stack, 4); // Pop value (2 slots), index, and array ref
+                break;
+                
+            case OperationCode.AASTORE:
+                newState.Stack = Pop(newState.Stack, 3); // Pop value, index, and array ref
+                break;
+                
+            case OperationCode.BASTORE:
+            case OperationCode.CASTORE:
+            case OperationCode.SASTORE:
+                newState.Stack = Pop(newState.Stack, 3); // Pop value, index, and array ref
+                break;
+
+            // Stack
+            case OperationCode.DUP_X1:
+                SimulateDupX1(ref newState);
+                break;
+                
+            case OperationCode.DUP_X2:
+                SimulateDupX2(ref newState);
+                break;
+                
+            case OperationCode.DUP2:
+                SimulateDup2(ref newState);
+                break;
+                
+            case OperationCode.DUP2_X1:
+                SimulateDup2X1(ref newState);
+                break;
+                
+            case OperationCode.DUP2_X2:
+                SimulateDup2X2(ref newState);
+                break;
+                
+            case OperationCode.SWAP:
+                SimulateSwap(ref newState);
+                break;
+
+            // Math
+            case OperationCode.ISUB:
+            case OperationCode.IMUL:
+            case OperationCode.IDIV:
+            case OperationCode.IREM:
+            case OperationCode.INEG:
+            case OperationCode.ISHL:
+            case OperationCode.ISHR:
+            case OperationCode.IUSHR:
+            case OperationCode.IAND:
+            case OperationCode.IOR:
+            case OperationCode.IXOR:
+                newState.Stack = Pop(newState.Stack, 1);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+                
+            case OperationCode.LSUB:
+            case OperationCode.LMUL:
+            case OperationCode.LDIV:
+            case OperationCode.LREM:
+            case OperationCode.LNEG:
+            case OperationCode.LSHL:
+            case OperationCode.LSHR:
+            case OperationCode.LUSHR:
+            case OperationCode.LAND:
+            case OperationCode.LOR:
+            case OperationCode.LXOR:
+                newState.Stack = Pop(newState.Stack, 2);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case OperationCode.FSUB:
+            case OperationCode.FMUL:
+            case OperationCode.FDIV:
+            case OperationCode.FREM:
+            case OperationCode.FNEG:
+                newState.Stack = Pop(newState.Stack, 1);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+                });
+                break;
+                
+            case OperationCode.DSUB:
+            case OperationCode.DMUL:
+            case OperationCode.DDIV:
+            case OperationCode.DREM:
+            case OperationCode.DNEG:
+                newState.Stack = Pop(newState.Stack, 2);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+
+            // Conversions
+            case OperationCode.L2F:
+                newState.Stack = Pop(newState.Stack, 2);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+                });
+                break;
+                
+            case OperationCode.L2D:
+                newState.Stack = Pop(newState.Stack, 2);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case OperationCode.F2L:
+                newState.Stack = Pop(newState.Stack, 1);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case OperationCode.F2D:
+                newState.Stack = Pop(newState.Stack, 1);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case OperationCode.D2F:
+                newState.Stack = Pop(newState.Stack, 2);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+                });
+                break;
+                
+            case OperationCode.D2L:
+                newState.Stack = Pop(newState.Stack, 2);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
+                });
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case OperationCode.I2B:
+            case OperationCode.I2C:
+            case OperationCode.I2S:
+                newState.Stack = Pop(newState.Stack, 1);
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+
+            // Comparisons
+            case OperationCode.LCMP:
+                newState.Stack = Pop(newState.Stack, 4); // Pop two longs (4 slots)
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+                
+            case OperationCode.FCMPL:
+            case OperationCode.FCMPG:
+                newState.Stack = Pop(newState.Stack, 2); // Pop two floats
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+                
+            case OperationCode.DCMPL:
+            case OperationCode.DCMPG:
+                newState.Stack = Pop(newState.Stack, 4); // Pop two doubles (4 slots)
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+
+            // Control flow
+            case OperationCode.IFEQ:
+            case OperationCode.IFNE:
+            case OperationCode.IFLT:
+            case OperationCode.IFGE:
+            case OperationCode.IFGT:
+            case OperationCode.IFLE:
+            case OperationCode.IF_ICMPEQ:
+            case OperationCode.IF_ICMPNE:
+            case OperationCode.IF_ICMPLT:
+            case OperationCode.IF_ICMPGE:
+            case OperationCode.IF_ICMPGT:
+            case OperationCode.IF_ICMPLE:
+            case OperationCode.IF_ACMPEQ:
+            case OperationCode.IF_ACMPNE:
+            case OperationCode.IFNULL:
+            case OperationCode.IFNONNULL:
+                newState.Stack = Pop(newState.Stack, IsConditionalBranch(instruction.OpCode) ? 1 : 2);
+                break;
+                
+            case OperationCode.GOTO:
+            case OperationCode.JSR:
+            case OperationCode.GOTO_W:
+            case OperationCode.JSR_W:
+                // No stack effect
+                break;
+                
+            case OperationCode.RET:
+                // Return from subroutine - handled by control flow
+                break;
+                
+            case OperationCode.TABLESWITCH:
+            case OperationCode.LOOKUPSWITCH:
+                newState.Stack = Pop(newState.Stack, 1); // Pop key
+                break;
+                
+            case OperationCode.IRETURN:
                 newState.Stack = Pop(newState.Stack, 1);
                 break;
                 
-            case OperationCode.POP2:
+            case OperationCode.LRETURN:
                 newState.Stack = Pop(newState.Stack, 2);
                 break;
                 
-            case OperationCode.DUP:
-                SimulateDup(ref newState);
+            case OperationCode.FRETURN:
+                newState.Stack = Pop(newState.Stack, 1);
                 break;
-            
-            case OperationCode.I2L:
-            newState.Stack = Pop(newState.Stack, 1);
-            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-            {
-                LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
-            });
-            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-            {
-                TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
-            });
-            break;
-            
-        case OperationCode.I2F:
-            newState.Stack = Pop(newState.Stack, 1);
-            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-            {
-                FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
-            });
-            break;
-            
-        case OperationCode.I2D:
-            newState.Stack = Pop(newState.Stack, 1);
-            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-            {
-                DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
-            });
-            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-            {
-                TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
-            });
-            break;
-            
-        case OperationCode.L2I:
-            newState.Stack = Pop(newState.Stack, 2);
-            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-            {
-                IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
-            });
-            break;
-            
-        case OperationCode.NEWARRAY:
-            newState.Stack = Pop(newState.Stack, 1); // Pop count
-            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-            {
-                ObjectVariableInfo = new ObjectVariableInfoStruct
-                {
-                    Tag = 7,
-                    CPoolIndex = FindClassConstantIndex("java/lang/Object")
-                }
-            });
-            break;
-            
-        case OperationCode.ANEWARRAY:
-            newState.Stack = Pop(newState.Stack, 1); // Pop count
-            ushort classIndex = GetClassIndex(instruction);
-            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-            {
-                ObjectVariableInfo = new ObjectVariableInfoStruct
-                {
-                    Tag = 7,
-                    CPoolIndex = classIndex
-                }
-            });
-            break;
-            
-        case OperationCode.ARRAYLENGTH:
-            newState.Stack = Pop(newState.Stack, 1); // Pop array reference
-            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-            {
-                IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
-            });
-            break;
-            
-        case OperationCode.ATHROW:
-            newState.Stack = Pop(newState.Stack, 1); // Pop exception
-            // Exception handling will be handled by the control flow
-            break;
-            
-        case OperationCode.CHECKCAST:
-            // Checkcast doesn't change the type of the object, just checks it
-            // The type on the stack remains the same
-            break;
-            
-        case OperationCode.INSTANCEOF:
-            newState.Stack = Pop(newState.Stack, 1); // Pop object reference
-            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
-            {
-                IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
-            });
-            break;
-            
                 
-            // TODO: Many more instructions would be handled in a complete implementation
+            case OperationCode.DRETURN:
+                newState.Stack = Pop(newState.Stack, 2);
+                break;
+                
+            case OperationCode.ARETURN:
+                newState.Stack = Pop(newState.Stack, 1);
+                break;
+
+            // References
+            case OperationCode.PUTSTATIC:
+                newState.Stack = Pop(newState.Stack, 1); // Pop value
+                break;
+                
+            case OperationCode.INVOKEDYNAMIC:
+                SimulateInvoke(ref newState, instruction);
+                break;
+                
+            case OperationCode.MULTIANEWARRAY:
+                int dimensions = instruction.Operands[1].Data[0];
+                newState.Stack = Pop(newState.Stack, dimensions); // Pop dimension counts
+                newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+                {
+                    ObjectVariableInfo = new ObjectVariableInfoStruct
+                    {
+                        Tag = 7,
+                        CPoolIndex = GetClassIndex(instruction)
+                    }
+                });
+                break;
+                
+            case OperationCode.MONITORENTER:
+            case OperationCode.MONITOREXIT:
+                newState.Stack = Pop(newState.Stack, 1); // Pop object reference
+                break;
+
+            // Extended
+            case OperationCode.WIDE:
+                // WIDE prefix - handled separately in instruction decoding
+                break;
+                
+            default:
+                throw new NotSupportedException($"Unsupported opcode: {instruction.OpCode}");
         }
         
         return newState;
     }
+    
+    private void SimulateLdc(ref FrameState state, Code instruction)
+    {
+        ushort index = GetConstantIndex(instruction);
+        var constantInfo = Helper.ByIndex(index);
+        
+        if (constantInfo == null)
+            return;
+            
+        var constantStruct = constantInfo.ToStruct().ToConstantStruct();
+        
+        switch (constantStruct)
+        {
+            case ConstantIntegerInfoStruct intInfo:
+                state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+                {
+                    IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+                });
+                break;
+                
+            case ConstantFloatInfoStruct floatInfo:
+                state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+                {
+                    FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+                });
+                break;
+                
+            case ConstantLongInfoStruct longInfo:
+                state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+                {
+                    LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
+                });
+                state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case ConstantDoubleInfoStruct doubleInfo:
+                state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+                {
+                    DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
+                });
+                state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                });
+                break;
+                
+            case ConstantStringInfoStruct stringInfo:
+            case ConstantClassInfoStruct classInfo:
+                state.Stack = Push(state.Stack, new VerificationTypeInfoStruct
+                {
+                    ObjectVariableInfo = new ObjectVariableInfoStruct
+                    {
+                        Tag = 7,
+                        CPoolIndex = FindClassConstantIndex("java/lang/Object")
+                    }
+                });
+                break;
+        }
+    }
 
+    private ushort GetConstantIndex(Code instruction)
+    {
+        if (instruction.Operands.Count > 0)
+        {
+            byte[] data = instruction.Operands[0].Data;
+            if (data.Length == 1)
+            {
+                return data[0];
+            }
+            else if (data.Length == 2)
+            {
+                return (ushort)((data[0] << 8) | data[1]);
+            }
+        }
+        return 0;
+    }
+
+    private void SimulateDupX1(ref FrameState state)
+    {
+        if (state.Stack.Length >= 2)
+        {
+            var top = state.Stack[state.Stack.Length - 1];
+            var second = state.Stack[state.Stack.Length - 2];
+            
+            state.Stack = Pop(state.Stack, 2);
+            state.Stack = Push(state.Stack, top);
+            state.Stack = Push(state.Stack, second);
+            state.Stack = Push(state.Stack, top);
+        }
+    }
+
+    private void SimulateDupX2(ref FrameState state)
+    {
+        if (state.Stack.Length >= 3)
+        {
+            var top = state.Stack[state.Stack.Length - 1];
+            var second = state.Stack[state.Stack.Length - 2];
+            var third = state.Stack[state.Stack.Length - 3];
+            
+            state.Stack = Pop(state.Stack, 3);
+            state.Stack = Push(state.Stack, top);
+            state.Stack = Push(state.Stack, third);
+            state.Stack = Push(state.Stack, second);
+            state.Stack = Push(state.Stack, top);
+        }
+    }
+
+    private void SimulateDup2(ref FrameState state)
+    {
+        if (state.Stack.Length >= 2)
+        {
+            var top = state.Stack[state.Stack.Length - 1];
+            var second = state.Stack[state.Stack.Length - 2];
+            
+            state.Stack = Push(state.Stack, second);
+            state.Stack = Push(state.Stack, top);
+            state.Stack = Push(state.Stack, second);
+            state.Stack = Push(state.Stack, top);
+        }
+    }
+
+    private void SimulateDup2X1(ref FrameState state)
+    {
+        if (state.Stack.Length >= 3)
+        {
+            var top = state.Stack[state.Stack.Length - 1];
+            var second = state.Stack[state.Stack.Length - 2];
+            var third = state.Stack[state.Stack.Length - 3];
+            
+            state.Stack = Pop(state.Stack, 3);
+            state.Stack = Push(state.Stack, second);
+            state.Stack = Push(state.Stack, top);
+            state.Stack = Push(state.Stack, third);
+            state.Stack = Push(state.Stack, second);
+            state.Stack = Push(state.Stack, top);
+        }
+    }
+
+    private void SimulateDup2X2(ref FrameState state)
+    {
+        if (state.Stack.Length >= 4)
+        {
+            var top = state.Stack[state.Stack.Length - 1];
+            var second = state.Stack[state.Stack.Length - 2];
+            var third = state.Stack[state.Stack.Length - 3];
+            var fourth = state.Stack[state.Stack.Length - 4];
+            
+            state.Stack = Pop(state.Stack, 4);
+            state.Stack = Push(state.Stack, second);
+            state.Stack = Push(state.Stack, top);
+            state.Stack = Push(state.Stack, fourth);
+            state.Stack = Push(state.Stack, third);
+            state.Stack = Push(state.Stack, second);
+            state.Stack = Push(state.Stack, top);
+        }
+    }
+
+    private void SimulateSwap(ref FrameState state)
+    {
+        if (state.Stack.Length >= 2)
+        {
+            var top = state.Stack[state.Stack.Length - 1];
+            var second = state.Stack[state.Stack.Length - 2];
+            
+            state.Stack = Pop(state.Stack, 2);
+            state.Stack = Push(state.Stack, top);
+            state.Stack = Push(state.Stack, second);
+        }
+    }
+
+    
     private void SimulateLoad(ref FrameState state, Code instruction)
     {
         int index = GetLoadStoreIndex(instruction);

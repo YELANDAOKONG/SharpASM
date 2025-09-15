@@ -7,6 +7,7 @@ using System.Linq;
 using SharpASM.Analysis.Executor.Models;
 using SharpASM.Utilities;
 using System;
+using SharpASM.Models.Struct;
 using SharpASM.Models.Type;
 
 namespace SharpASM.Analysis.Executor;
@@ -16,6 +17,9 @@ public class CodeExecutor
     public Class Clazz { get; private set; }
     public CodeAttributeStruct Code { get; private set; }
     public List<Code> Codes { get; private set; }
+    
+    public ConstantPoolHelper Helper { get; private set; }
+    
     private Dictionary<int, FrameState> _frameStates;
     private List<int> _instructionOffsets;
     private List<BasicBlock> _basicBlocks;
@@ -26,6 +30,9 @@ public class CodeExecutor
         Clazz = clazz;
         Code = code;
         Codes = byteCodes;
+
+        Helper = Clazz.GetConstantPoolHelper();
+        
         _method = method;
         _frameStates = new Dictionary<int, FrameState>();
         _instructionOffsets = CalculateInstructionOffsets();
@@ -38,7 +45,9 @@ public class CodeExecutor
         InitializeInitialFrameState();
         SimulateExecution();
         var frames = BuildFrames();
-            
+    
+        Clazz.ConstantPool = Helper.ToList();
+        
         return new StackMapTableAttributeStruct
         {
             Entries = frames.ToArray()
@@ -381,9 +390,13 @@ public class CodeExecutor
 
     private ushort FindClassConstantIndex(string className)
     {
-        // Simplified implementation - in real scenario, search constant pool
-        // For now, return a placeholder
-        return 1;
+        var classIndex = Helper.FindClass(className);
+        if (classIndex != null)
+        {
+            return classIndex.Value;
+        }
+    
+        return Helper.NewClass(className);
     }
 
     private VerificationTypeInfoStruct CreateObjectTypeInfo(string className)
@@ -493,58 +506,87 @@ public class CodeExecutor
 
     private FrameState MergeFrameStates(FrameState state1, FrameState state2)
     {
-        // For simplicity, we use the more general type when types differ
-        // In a real implementation, we would need proper type merging rules
-        
         var mergedLocals = new VerificationTypeInfoStruct[Code.MaxLocals];
+    
         for (int i = 0; i < Code.MaxLocals; i++)
         {
             if (i < state1.Locals.Length && i < state2.Locals.Length)
             {
-                if (AreTypesEqual(state1.Locals[i], state2.Locals[i]))
-                {
-                    mergedLocals[i] = state1.Locals[i];
-                }
-                else
-                {
-                    // Types differ - use top
-                    mergedLocals[i] = new VerificationTypeInfoStruct
-                    {
-                        TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
-                    };
-                }
+                mergedLocals[i] = MergeTypes(state1.Locals[i], state2.Locals[i]);
             }
-        }
-        
-        // Stack must be identical at merge points
-        if (state1.Stack.Length != state2.Stack.Length)
-        {
-            throw new InvalidProgramException("Inconsistent stack height at merge point");
-        }
-        
-        var mergedStack = new VerificationTypeInfoStruct[state1.Stack.Length];
-        for (int i = 0; i < state1.Stack.Length; i++)
-        {
-            if (AreTypesEqual(state1.Stack[i], state2.Stack[i]))
+            else if (i < state1.Locals.Length)
             {
-                mergedStack[i] = state1.Stack[i];
+                mergedLocals[i] = state1.Locals[i];
+            }
+            else if (i < state2.Locals.Length)
+            {
+                mergedLocals[i] = state2.Locals[i];
             }
             else
             {
-                // Types differ - use top
-                mergedStack[i] = new VerificationTypeInfoStruct
+                mergedLocals[i] = new VerificationTypeInfoStruct
                 {
                     TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
                 };
             }
         }
-        
+    
+        if (state1.Stack.Length != state2.Stack.Length)
+        {
+            throw new InvalidProgramException("Inconsistent stack height at merge point");
+        }
+    
+        var mergedStack = new VerificationTypeInfoStruct[state1.Stack.Length];
+        for (int i = 0; i < state1.Stack.Length; i++)
+        {
+            mergedStack[i] = MergeTypes(state1.Stack[i], state2.Stack[i]);
+        }
+    
         return new FrameState
         {
             Locals = mergedLocals,
             Stack = mergedStack
         };
     }
+    
+    private VerificationTypeInfoStruct MergeTypes(VerificationTypeInfoStruct type1, VerificationTypeInfoStruct type2)
+    {
+        // 如果类型相同，直接返回
+        if (AreTypesEqual(type1, type2))
+        {
+            return type1;
+        }
+    
+        // 如果一个是 NULL，另一个是对象类型，可以合并为对象类型
+        if (type1.NullVariableInfo != null && type2.ObjectVariableInfo != null)
+        {
+            return type2;
+        }
+    
+        if (type2.NullVariableInfo != null && type1.ObjectVariableInfo != null)
+        {
+            return type1;
+        }
+    
+        // 如果都是数值类型，可以合并为整数类型（简化处理）
+        if ((type1.IntegerVariableInfo != null || type1.FloatVariableInfo != null || 
+             type1.LongVariableInfo != null || type1.DoubleVariableInfo != null) &&
+            (type2.IntegerVariableInfo != null || type2.FloatVariableInfo != null || 
+             type2.LongVariableInfo != null || type2.DoubleVariableInfo != null))
+        {
+            return new VerificationTypeInfoStruct
+            {
+                IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+            };
+        }
+    
+        // 默认情况下，使用 Top 类型
+        return new VerificationTypeInfoStruct
+        {
+            TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+        };
+    }
+
 
     private bool AreTypesEqual(VerificationTypeInfoStruct type1, VerificationTypeInfoStruct type2)
     {
@@ -653,8 +695,100 @@ public class CodeExecutor
             case OperationCode.DUP:
                 SimulateDup(ref newState);
                 break;
+            
+            case OperationCode.I2L:
+            newState.Stack = Pop(newState.Stack, 1);
+            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+            {
+                LongVariableInfo = new LongVariableInfoStruct { Tag = 4 }
+            });
+            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+            {
+                TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+            });
+            break;
+            
+        case OperationCode.I2F:
+            newState.Stack = Pop(newState.Stack, 1);
+            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+            {
+                FloatVariableInfo = new FloatVariableInfoStruct { Tag = 2 }
+            });
+            break;
+            
+        case OperationCode.I2D:
+            newState.Stack = Pop(newState.Stack, 1);
+            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+            {
+                DoubleVariableInfo = new DoubleVariableInfoStruct { Tag = 3 }
+            });
+            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+            {
+                TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+            });
+            break;
+            
+        case OperationCode.L2I:
+            newState.Stack = Pop(newState.Stack, 2);
+            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+            {
+                IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+            });
+            break;
+            
+        case OperationCode.NEWARRAY:
+            newState.Stack = Pop(newState.Stack, 1); // Pop count
+            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+            {
+                ObjectVariableInfo = new ObjectVariableInfoStruct
+                {
+                    Tag = 7,
+                    CPoolIndex = FindClassConstantIndex("java/lang/Object")
+                }
+            });
+            break;
+            
+        case OperationCode.ANEWARRAY:
+            newState.Stack = Pop(newState.Stack, 1); // Pop count
+            ushort classIndex = GetClassIndex(instruction);
+            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+            {
+                ObjectVariableInfo = new ObjectVariableInfoStruct
+                {
+                    Tag = 7,
+                    CPoolIndex = classIndex
+                }
+            });
+            break;
+            
+        case OperationCode.ARRAYLENGTH:
+            newState.Stack = Pop(newState.Stack, 1); // Pop array reference
+            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+            {
+                IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+            });
+            break;
+            
+        case OperationCode.ATHROW:
+            newState.Stack = Pop(newState.Stack, 1); // Pop exception
+            // Exception handling will be handled by the control flow
+            break;
+            
+        case OperationCode.CHECKCAST:
+            // Checkcast doesn't change the type of the object, just checks it
+            // The type on the stack remains the same
+            break;
+            
+        case OperationCode.INSTANCEOF:
+            newState.Stack = Pop(newState.Stack, 1); // Pop object reference
+            newState.Stack = Push(newState.Stack, new VerificationTypeInfoStruct
+            {
+                IntegerVariableInfo = new IntegerVariableInfoStruct { Tag = 1 }
+            });
+            break;
+            
                 
-            // Many more instructions would be handled in a complete implementation
+            // TODO: Many more instructions would be handled in a complete implementation
         }
         
         return newState;
@@ -812,9 +946,49 @@ public class CodeExecutor
 
     private string GetMethodDescriptor(ushort methodRefIndex)
     {
-        // Simplified - in real implementation, look up in constant pool
-        return "()V";
+        var methodRefInfo = Helper.ByIndex(methodRefIndex);
+        if (methodRefInfo == null)
+        {
+            throw new ArgumentException($"Method ref not found at index {methodRefIndex}");
+        }
+    
+        var methodRefStruct = methodRefInfo.ToStruct().ToConstantStruct() as ConstantMethodrefInfoStruct;
+        if (methodRefStruct == null)
+        {
+            throw new ArgumentException($"Constant at index {methodRefIndex} is not a method reference");
+        }
+    
+        ushort nameAndTypeIndex = methodRefStruct.NameAndTypeIndex;
+    
+        var nameAndTypeInfo = Helper.ByIndex(nameAndTypeIndex);
+        if (nameAndTypeInfo == null)
+        {
+            throw new ArgumentException($"NameAndType not found at index {nameAndTypeIndex}");
+        }
+    
+        var nameAndTypeStruct = nameAndTypeInfo.ToStruct().ToConstantStruct() as ConstantNameAndTypeInfoStruct;
+        if (nameAndTypeStruct == null)
+        {
+            throw new ArgumentException($"Constant at index {nameAndTypeIndex} is not a name and type");
+        }
+    
+        ushort descriptorIndex = nameAndTypeStruct.DescriptorIndex;
+    
+        var descriptorInfo = Helper.ByIndex(descriptorIndex);
+        if (descriptorInfo == null)
+        {
+            throw new ArgumentException($"Descriptor not found at index {descriptorIndex}");
+        }
+    
+        var descriptorStruct = descriptorInfo.ToStruct().ToConstantStruct() as ConstantUtf8InfoStruct;
+        if (descriptorStruct == null)
+        {
+            throw new ArgumentException($"Constant at index {descriptorIndex} is not a UTF8 string");
+        }
+    
+        return descriptorStruct.ToString();
     }
+
 
     private void SimulateNew(ref FrameState state, Code instruction)
     {

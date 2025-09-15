@@ -4,7 +4,7 @@ namespace SharpASM.Models.Code;
 
 public class Code
 {
-    public OperationCode? Prefix { get; set; } = null;
+    public OperationCode? Prefix { get; set; } = null; // Example: WIDE
     public OperationCode OpCode { get; set; }
     public List<Operand> Operands { get; set; } = new List<Operand>();
     

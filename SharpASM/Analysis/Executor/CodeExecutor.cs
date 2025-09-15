@@ -976,13 +976,3 @@ public class CodeExecutor
         Code.MaxLocals = maxLocals;
     }
 }
-
-// Basic block representation
-public class BasicBlock
-{
-    public int StartOffset { get; set; }
-    public int EndOffset { get; set; }
-    public List<Code> Instructions { get; set; } = new List<Code>();
-    public List<BasicBlock> Successors { get; set; } = new List<BasicBlock>();
-    public List<BasicBlock> ExceptionHandlers { get; set; } = new List<BasicBlock>();
-}

@@ -41,6 +41,11 @@ public class CodeExecutor
     
     public StackMapTableAttributeStruct RebuildStackMapTable()
     {
+        if (Code.CodeLength == 0)
+        {
+            return new StackMapTableAttributeStruct { Entries = Array.Empty<StackMapFrameStruct>() };
+        }
+        
         AnalyzeControlFlow();
         InitializeInitialFrameState();
         SimulateExecution();
@@ -127,6 +132,12 @@ public class CodeExecutor
             int startOffset = sortedLeaders[i];
             int endOffset = (i < sortedLeaders.Count - 1) ? sortedLeaders[i + 1] - 1 : (int)Code.CodeLength - 1;
             
+            // 确保基本块范围有效
+            if (startOffset > endOffset)
+            {
+                continue;
+            }
+            
             var block = new BasicBlock
             {
                 StartOffset = startOffset,
@@ -134,12 +145,22 @@ public class CodeExecutor
                 Instructions = GetInstructionsInRange(startOffset, endOffset)
             };
             
-            _basicBlocks.Add(block);
+            // 只添加有指令的基本块
+            if (block.Instructions.Count > 0)
+            {
+                _basicBlocks.Add(block);
+            }
         }
         
         // Connect basic blocks
         foreach (var block in _basicBlocks)
         {
+            // 跳过没有指令的块
+            if (block.Instructions.Count == 0)
+            {
+                continue;
+            }
+            
             var lastInstruction = block.Instructions.Last();
             int lastOffset = _instructionOffsets[Codes.IndexOf(lastInstruction)];
             

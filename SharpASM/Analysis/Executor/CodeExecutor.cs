@@ -370,14 +370,18 @@ public class CodeExecutor
                 _ => throw new ArgumentException($"Unknown primitive type: {typeInfo.Descriptor}")
             };
         }
-        else if (typeInfo.Descriptor == "Ljava/lang/Object;")
+        else if (typeInfo.Descriptor.StartsWith("["))
         {
+            // Handle array types properly
+            string arrayDescriptor = typeInfo.Descriptor;
+            ushort classIndex = FindClassConstantIndex(arrayDescriptor);
+        
             return new VerificationTypeInfoStruct
             {
                 ObjectVariableInfo = new ObjectVariableInfoStruct
                 {
                     Tag = 7,
-                    CPoolIndex = FindClassConstantIndex("java/lang/Object")
+                    CPoolIndex = classIndex
                 }
             };
         }
@@ -393,19 +397,7 @@ public class CodeExecutor
                 }
             };
         }
-        else if (typeInfo.Descriptor.StartsWith("["))
-        {
-            // For arrays, we use Object type for now (simplified)
-            return new VerificationTypeInfoStruct
-            {
-                ObjectVariableInfo = new ObjectVariableInfoStruct
-                {
-                    Tag = 7,
-                    CPoolIndex = FindClassConstantIndex("java/lang/Object")
-                }
-            };
-        }
-        
+    
         throw new ArgumentException($"Unknown type descriptor: {typeInfo.Descriptor}");
     }
 
@@ -2136,9 +2128,22 @@ public class CodeExecutor
 
     private StackMapFrameStruct CreateStackMapFrame(int offsetDelta, FrameState frameState)
     {
-        // Choose the most compact frame type
+        // Ensure locals array has exactly MaxLocals elements
+        if (frameState.Locals.Length != Code.MaxLocals)
+        {
+            var adjustedLocals = new VerificationTypeInfoStruct[Code.MaxLocals];
+            Array.Copy(frameState.Locals, adjustedLocals, Math.Min(frameState.Locals.Length, Code.MaxLocals));
+            for (int i = frameState.Locals.Length; i < Code.MaxLocals; i++)
+            {
+                adjustedLocals[i] = new VerificationTypeInfoStruct
+                {
+                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
+                };
+            }
+            frameState.Locals = adjustedLocals;
+        }
         
-        // Check for same frame
+        // Choose the most compact frame type
         if (frameState.Stack.Length == 0)
         {
             return new StackMapFrameStruct

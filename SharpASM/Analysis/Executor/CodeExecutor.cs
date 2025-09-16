@@ -45,19 +45,24 @@ public class CodeExecutor
         {
             return new StackMapTableAttributeStruct { Entries = Array.Empty<StackMapFrameStruct>() };
         }
-        
+    
         AnalyzeControlFlow();
         InitializeInitialFrameState();
         SimulateExecution();
-        var frames = BuildFrames();
     
+        // Update max values before building frames
+        UpdateMaxStackAndLocals();
+    
+        var frames = BuildFrames();
+
         Clazz.ConstantPool = Helper.ToList();
-        
+    
         return new StackMapTableAttributeStruct
         {
             Entries = frames.ToArray()
         };
     }
+
 
     private List<int> CalculateInstructionOffsets()
     {
@@ -372,16 +377,13 @@ public class CodeExecutor
         }
         else if (typeInfo.Descriptor.StartsWith("["))
         {
-            // Handle array types properly
-            string arrayDescriptor = typeInfo.Descriptor;
-            ushort classIndex = FindClassConstantIndex(arrayDescriptor);
-        
+            // Handle array types properly by using the array descriptor directly
             return new VerificationTypeInfoStruct
             {
                 ObjectVariableInfo = new ObjectVariableInfoStruct
                 {
                     Tag = 7,
-                    CPoolIndex = classIndex
+                    CPoolIndex = FindClassConstantIndex(typeInfo.Descriptor)
                 }
             };
         }
@@ -397,7 +399,7 @@ public class CodeExecutor
                 }
             };
         }
-    
+
         throw new ArgumentException($"Unknown type descriptor: {typeInfo.Descriptor}");
     }
 

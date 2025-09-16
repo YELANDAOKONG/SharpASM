@@ -704,11 +704,11 @@ public class CodeExecutor
         return false;
     }
 
-    private FrameState SimulateInstruction(FrameState state, Code instruction)
+    private FrameState SimulateInstruction(FrameState state, Code instruction) // , bool printDebug = false)
     {
         var newState = state.Clone();
         
-        Console.WriteLine($"[%] SIMULATE: (L{state.Locals.Length} S{state.Stack.Length}) {instruction.OpCode.ToString()}");
+        // if (printDebug) Console.WriteLine($"[%] SIMULATE: (L{state.Locals.Length} S{state.Stack.Length}) {instruction.OpCode.ToString()}");
         switch (instruction.OpCode)
         {
             // Constants
@@ -1917,29 +1917,47 @@ public class CodeExecutor
         // 获取方法引用索引
         ushort methodRefIndex = GetMethodRefIndex(instruction);
     
+        // 检查指令类型并验证常量池条目
+        if (instruction.OpCode == OperationCode.INVOKEINTERFACE)
+        {
+            var methodRefInfo = Helper.ByIndex(methodRefIndex);
+            if (methodRefInfo != null && methodRefInfo.Tag != ConstantPoolTag.InterfaceMethodref)
+            {
+                throw new ArgumentException($"INVOKEINTERFACE requires an interface method reference at index {methodRefIndex}");
+            }
+        }
+        else
+        {
+            var methodRefInfo = Helper.ByIndex(methodRefIndex);
+            if (methodRefInfo != null && methodRefInfo.Tag != ConstantPoolTag.Methodref)
+            {
+                throw new ArgumentException($"Non-interface invoke requires a method reference at index {methodRefIndex}");
+            }
+        }
+
         // 从常量池获取方法描述符
         var methodDescriptor = GetMethodDescriptor(methodRefIndex);
         var descriptorInfo = DescriptorParser.ParseMethodDescriptor(methodDescriptor);
-    
+
         // 计算需要弹出的参数数量
         int popCount = descriptorInfo.Parameters.Count;
-    
+
         // 对于非静态方法，需要额外弹出 this 引用
         if (instruction.OpCode != OperationCode.INVOKESTATIC && 
             instruction.OpCode != OperationCode.INVOKEDYNAMIC)
         {
             popCount++;
         }
-    
+
         // 弹出参数
         state.Stack = Pop(state.Stack, popCount);
-    
+
         // 如果有返回值，推入栈
         if (descriptorInfo.ReturnType != null && descriptorInfo.ReturnType.Descriptor != "V")
         {
             var returnType = ConvertDescriptorToVerificationType(descriptorInfo.ReturnType);
             state.Stack = Push(state.Stack, returnType);
-        
+    
             // 对于 Long 和 Double 类型，需要额外的栈槽
             if (descriptorInfo.ReturnType.Descriptor == "J" || 
                 descriptorInfo.ReturnType.Descriptor == "D")
@@ -1972,44 +1990,63 @@ public class CodeExecutor
         {
             throw new ArgumentException($"Method ref not found at index {methodRefIndex}");
         }
-    
-        var methodRefStruct = methodRefInfo.ToStruct().ToConstantStruct() as ConstantMethodrefInfoStruct;
-        if (methodRefStruct == null)
+
+        // Check if it's a method reference or interface method reference
+        if (methodRefInfo.Tag != ConstantPoolTag.Methodref && 
+            methodRefInfo.Tag != ConstantPoolTag.InterfaceMethodref)
         {
-            throw new ArgumentException($"Constant at index {methodRefIndex} is not a method reference");
+            throw new ArgumentException($"Constant at index {methodRefIndex} is not a method reference (tag: {methodRefInfo.Tag})");
         }
-    
-        ushort nameAndTypeIndex = methodRefStruct.NameAndTypeIndex;
-    
+
+        ushort nameAndTypeIndex;
+        
+        if (methodRefInfo.Tag == ConstantPoolTag.Methodref)
+        {
+            var methodRefStruct = methodRefInfo.ToStruct().ToConstantStruct() as ConstantMethodrefInfoStruct;
+            if (methodRefStruct == null)
+            {
+                throw new ArgumentException($"Constant at index {methodRefIndex} is not a method reference");
+            }
+            nameAndTypeIndex = methodRefStruct.NameAndTypeIndex;
+        }
+        else // InterfaceMethodref
+        {
+            var interfaceMethodRefStruct = methodRefInfo.ToStruct().ToConstantStruct() as ConstantInterfaceMethodrefInfoStruct;
+            if (interfaceMethodRefStruct == null)
+            {
+                throw new ArgumentException($"Constant at index {methodRefIndex} is not an interface method reference");
+            }
+            nameAndTypeIndex = interfaceMethodRefStruct.NameAndTypeIndex;
+        }
+
         var nameAndTypeInfo = Helper.ByIndex(nameAndTypeIndex);
         if (nameAndTypeInfo == null)
         {
             throw new ArgumentException($"NameAndType not found at index {nameAndTypeIndex}");
         }
-    
+
         var nameAndTypeStruct = nameAndTypeInfo.ToStruct().ToConstantStruct() as ConstantNameAndTypeInfoStruct;
         if (nameAndTypeStruct == null)
         {
             throw new ArgumentException($"Constant at index {nameAndTypeIndex} is not a name and type");
         }
-    
+
         ushort descriptorIndex = nameAndTypeStruct.DescriptorIndex;
-    
+
         var descriptorInfo = Helper.ByIndex(descriptorIndex);
         if (descriptorInfo == null)
         {
             throw new ArgumentException($"Descriptor not found at index {descriptorIndex}");
         }
-    
+
         var descriptorStruct = descriptorInfo.ToStruct().ToConstantStruct() as ConstantUtf8InfoStruct;
         if (descriptorStruct == null)
         {
             throw new ArgumentException($"Constant at index {descriptorIndex} is not a UTF8 string");
         }
-    
+
         return descriptorStruct.ToString();
     }
-
 
     private void SimulateNew(ref FrameState state, Code instruction)
     {

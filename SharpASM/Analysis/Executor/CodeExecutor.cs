@@ -443,6 +443,12 @@ public class CodeExecutor
         worklist.Enqueue(initialBlock);
         visited.Add(initialBlock);
         
+        // 确保初始状态已设置
+        if (!_frameStates.ContainsKey(0))
+        {
+            _frameStates[0] = GetMergedState(initialBlock);
+        }
+        
         while (worklist.Count > 0)
         {
             var block = worklist.Dequeue();
@@ -457,7 +463,14 @@ public class CodeExecutor
             }
             
             // Update final state for this block
-            _frameStates[block.EndOffset] = currentState;
+            if (_frameStates.ContainsKey(block.EndOffset))
+            {
+                _frameStates[block.EndOffset] = currentState;
+            }
+            else
+            {
+                _frameStates.Add(block.EndOffset, currentState);
+            }
             
             // Propagate to successors
             foreach (var successor in block.Successors)
@@ -485,7 +498,14 @@ public class CodeExecutor
                     Stack = new[] { CreateObjectTypeInfo("java/lang/Throwable") }
                 };
                 
-                _frameStates[handler.StartOffset] = handlerState;
+                if (_frameStates.ContainsKey(handler.StartOffset))
+                {
+                    _frameStates[handler.StartOffset] = handlerState;
+                }
+                else
+                {
+                    _frameStates.Add(handler.StartOffset, handlerState);
+                }
             }
         }
     }
@@ -493,17 +513,17 @@ public class CodeExecutor
     private FrameState GetMergedState(BasicBlock block)
     {
         var predecessors = _basicBlocks.Where(b => b.Successors.Contains(block)).ToList();
-        
+    
         if (predecessors.Count == 0)
         {
-            // Initial block or exception handler
+            // 初始块或异常处理程序
             if (_frameStates.TryGetValue(block.StartOffset, out var state))
             {
                 return state.Clone();
             }
             else
             {
-                // Should not happen for well-structured code
+                // 如果没有找到初始状态，创建一个新的空状态
                 return new FrameState
                 {
                     Locals = new VerificationTypeInfoStruct[Code.MaxLocals],
@@ -511,17 +531,31 @@ public class CodeExecutor
                 };
             }
         }
-        
-        // Start with first predecessor's state
+    
+        // 检查所有前驱是否都有状态
+        foreach (var pred in predecessors)
+        {
+            if (!_frameStates.ContainsKey(pred.EndOffset))
+            {
+                // 如果某个前驱没有状态，创建一个新的空状态
+                _frameStates[pred.EndOffset] = new FrameState
+                {
+                    Locals = new VerificationTypeInfoStruct[Code.MaxLocals],
+                    Stack = new VerificationTypeInfoStruct[0]
+                };
+            }
+        }
+    
+        // 从第一个前驱开始合并状态
         var firstState = _frameStates[predecessors[0].EndOffset].Clone();
-        
-        // Merge with other predecessors
+    
+        // 与其他前驱合并
         for (int i = 1; i < predecessors.Count; i++)
         {
             var otherState = _frameStates[predecessors[i].EndOffset];
             firstState = MergeFrameStates(firstState, otherState);
         }
-        
+    
         return firstState;
     }
 
@@ -531,25 +565,20 @@ public class CodeExecutor
     
         for (int i = 0; i < Code.MaxLocals; i++)
         {
-            if (i < state1.Locals.Length && i < state2.Locals.Length)
+            VerificationTypeInfoStruct? local1 = null;
+            VerificationTypeInfoStruct? local2 = null;
+        
+            if (i < state1.Locals.Length)
             {
-                mergedLocals[i] = MergeTypes(state1.Locals[i], state2.Locals[i]);
+                local1 = state1.Locals[i];
             }
-            else if (i < state1.Locals.Length)
+        
+            if (i < state2.Locals.Length)
             {
-                mergedLocals[i] = state1.Locals[i];
+                local2 = state2.Locals[i];
             }
-            else if (i < state2.Locals.Length)
-            {
-                mergedLocals[i] = state2.Locals[i];
-            }
-            else
-            {
-                mergedLocals[i] = new VerificationTypeInfoStruct
-                {
-                    TopVariableInfo = new TopVariableInfoStruct { Tag = 0 }
-                };
-            }
+        
+            mergedLocals[i] = MergeTypes(local1, local2);
         }
     
         if (state1.Stack.Length != state2.Stack.Length)
@@ -570,8 +599,11 @@ public class CodeExecutor
         };
     }
     
-    private VerificationTypeInfoStruct MergeTypes(VerificationTypeInfoStruct type1, VerificationTypeInfoStruct type2)
+    private VerificationTypeInfoStruct? MergeTypes(VerificationTypeInfoStruct? type1, VerificationTypeInfoStruct? type2)
     {
+        if (type1 == null) return type2;
+        if (type2 == null) return type1;
+        
         // 如果类型相同，直接返回
         if (AreTypesEqual(type1, type2))
         {
@@ -609,27 +641,55 @@ public class CodeExecutor
     }
 
 
-    private bool AreTypesEqual(VerificationTypeInfoStruct type1, VerificationTypeInfoStruct type2)
+    private bool AreTypesEqual(VerificationTypeInfoStruct? type1, VerificationTypeInfoStruct? type2)
     {
-        // Simplified type equality check
-        if (type1.TopVariableInfo != null && type2.TopVariableInfo != null) return true;
-        if (type1.IntegerVariableInfo != null && type2.IntegerVariableInfo != null) return true;
-        if (type1.FloatVariableInfo != null && type2.FloatVariableInfo != null) return true;
-        if (type1.LongVariableInfo != null && type2.LongVariableInfo != null) return true;
-        if (type1.DoubleVariableInfo != null && type2.DoubleVariableInfo != null) return true;
-        if (type1.NullVariableInfo != null && type2.NullVariableInfo != null) return true;
-        if (type1.UninitializedThisVariableInfo != null && type2.UninitializedThisVariableInfo != null) return true;
+        // 检查 Null 值
+        if (type1 == null && type2 == null) return true;
+        if (type1 == null || type2 == null) return false;
         
+        // 检查 Top 类型
+        if (type1.TopVariableInfo != null && type2.TopVariableInfo != null) return true;
+        if (type1.TopVariableInfo != null || type2.TopVariableInfo != null) return false;
+        
+        // 检查 Integer 类型
+        if (type1.IntegerVariableInfo != null && type2.IntegerVariableInfo != null) return true;
+        if (type1.IntegerVariableInfo != null || type2.IntegerVariableInfo != null) return false;
+        
+        // 检查 Float 类型
+        if (type1.FloatVariableInfo != null && type2.FloatVariableInfo != null) return true;
+        if (type1.FloatVariableInfo != null || type2.FloatVariableInfo != null) return false;
+        
+        // 检查 Long 类型
+        if (type1.LongVariableInfo != null && type2.LongVariableInfo != null) return true;
+        if (type1.LongVariableInfo != null || type2.LongVariableInfo != null) return false;
+        
+        // 检查 Double 类型
+        if (type1.DoubleVariableInfo != null && type2.DoubleVariableInfo != null) return true;
+        if (type1.DoubleVariableInfo != null || type2.DoubleVariableInfo != null) return false;
+        
+        // 检查 Null 类型
+        if (type1.NullVariableInfo != null && type2.NullVariableInfo != null) return true;
+        if (type1.NullVariableInfo != null || type2.NullVariableInfo != null) return false;
+        
+        // 检查 UninitializedThis 类型
+        if (type1.UninitializedThisVariableInfo != null && type2.UninitializedThisVariableInfo != null) return true;
+        if (type1.UninitializedThisVariableInfo != null || type2.UninitializedThisVariableInfo != null) return false;
+        
+        // 检查 Object 类型
         if (type1.ObjectVariableInfo != null && type2.ObjectVariableInfo != null)
         {
             return type1.ObjectVariableInfo.CPoolIndex == type2.ObjectVariableInfo.CPoolIndex;
         }
+        if (type1.ObjectVariableInfo != null || type2.ObjectVariableInfo != null) return false;
         
+        // 检查 Uninitialized 类型
         if (type1.UninitializedVariableInfo != null && type2.UninitializedVariableInfo != null)
         {
             return type1.UninitializedVariableInfo.Offset == type2.UninitializedVariableInfo.Offset;
         }
+        if (type1.UninitializedVariableInfo != null || type2.UninitializedVariableInfo != null) return false;
         
+        // 如果没有任何类型信息，返回 False
         return false;
     }
 

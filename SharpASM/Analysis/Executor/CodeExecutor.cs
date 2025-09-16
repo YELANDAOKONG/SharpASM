@@ -567,31 +567,42 @@ public class CodeExecutor
         {
             VerificationTypeInfoStruct? local1 = null;
             VerificationTypeInfoStruct? local2 = null;
-        
+    
             if (i < state1.Locals.Length)
             {
                 local1 = state1.Locals[i];
             }
-        
+    
             if (i < state2.Locals.Length)
             {
                 local2 = state2.Locals[i];
             }
-        
+    
             mergedLocals[i] = MergeTypes(local1, local2);
         }
+
+        // Handle inconsistent stack heights by finding the maximum height
+        int maxStackHeight = Math.Max(state1.Stack.Length, state2.Stack.Length);
+        var mergedStack = new VerificationTypeInfoStruct[maxStackHeight];
     
-        if (state1.Stack.Length != state2.Stack.Length)
+        for (int i = 0; i < maxStackHeight; i++)
         {
-            throw new InvalidProgramException("Inconsistent stack height at merge point");
+            VerificationTypeInfoStruct? stack1 = null;
+            VerificationTypeInfoStruct? stack2 = null;
+        
+            if (i < state1.Stack.Length)
+            {
+                stack1 = state1.Stack[i];
+            }
+        
+            if (i < state2.Stack.Length)
+            {
+                stack2 = state2.Stack[i];
+            }
+        
+            mergedStack[i] = MergeTypes(stack1, stack2);
         }
-    
-        var mergedStack = new VerificationTypeInfoStruct[state1.Stack.Length];
-        for (int i = 0; i < state1.Stack.Length; i++)
-        {
-            mergedStack[i] = MergeTypes(state1.Stack[i], state2.Stack[i]);
-        }
-    
+
         return new FrameState
         {
             Locals = mergedLocals,
